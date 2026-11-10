@@ -200,6 +200,8 @@
     renderAll();
     $("#langBtn").onclick = () => { lang = lang === "ko" ? "en" : "ko"; try { localStorage.setItem("olpark.lang", lang); } catch (e) {} renderAll(); };
     $$(".tab").forEach(t => t.onclick = e => { e.preventDefault(); location.hash = "#" + t.dataset.tab; showTab(t.dataset.tab); });
-    const h = location.hash.replace("#", ""); if (["schedule", "forecast", "quality"].includes(h)) showTab(h);
+    const fromHash = () => { const h = location.hash.replace("#", ""); if (["schedule", "forecast", "quality"].includes(h)) showTab(h); };
+    window.addEventListener("hashchange", fromHash);
+    fromHash();
   }).catch(err => { $("main").innerHTML = `<div class="empty">자료를 불러오지 못했습니다. ${esc(err.message)}</div>`; });
 })();
