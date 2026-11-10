@@ -1,0 +1,29 @@
+{
+  "source": "올림픽공원 누리집 공원가이드 > 주차 안내(2026-11-10 열람), 오시는 길",
+  "gates": ["북2문", "동2문", "남2문"],
+  "parkingHours": "06:00~22:00",
+  "fee": {"small": "10분당 600원, 일 최대 20,000원", "large": "10분당 1,200원, 일 최대 24,000원", "note": "공연 관람 티켓 할인 없음, 대형 행사 시 사전정산·일주차권 없음, 10분 이내 출차 무료"},
+  "subway": [
+    {"line": "5·9호선", "station": "올림픽공원역", "exit": "3번 출구", "gate": "동문(동2문 쪽)", "en": {"line": "Line 5·9", "station": "Olympic Park Stn.", "exit": "Exit 3", "gate": "East Gate"}},
+    {"line": "8호선", "station": "몽촌토성역", "exit": "1번 출구", "gate": "정문(평화의 문)", "en": {"line": "Line 8", "station": "Mongchontoseong Stn.", "exit": "Exit 1", "gate": "Main Gate (World Peace Gate)"}},
+    {"line": "9호선", "station": "한성백제역", "exit": "", "gate": "평화의 광장 쪽", "en": {"line": "Line 9", "station": "Hanseong Baekje Stn.", "exit": "", "gate": "Peace Plaza side"}}
+  ],
+  "venues": {
+    "KSPO DOME": {"en": "KSPO DOME (Olympic Gymnastics Arena)", "capacityNote": "약 1만 5천 석", "lot": "P5", "lotSpaces": 176, "walk": "1분", "gates": ["북2문", "동2문", "남2문"], "station": "5·9호선 올림픽공원역"},
+    "핸드볼경기장": {"en": "Ticketlink Live Arena (Handball Gymnasium)", "capacityNote": "약 5천 석", "lot": "P6", "lotSpaces": 167, "walk": "1~2분", "gates": ["동2문", "북2문", "남2문"], "station": "5·9호선 올림픽공원역"},
+    "올림픽홀": {"en": "Olympic Hall", "capacityNote": "약 3천 석", "lot": "P2, 올림픽홀 지하주차장", "lotSpaces": 320, "walk": "1~2분", "gates": ["동2문", "남2문", "북2문"], "station": "5·9호선 올림픽공원역"},
+    "우리금융아트홀": {"en": "Woori Financial Art Hall (Olympic Weightlifting Gymnasium)", "capacityNote": "약 1천 석", "lot": "P7", "lotSpaces": 137, "walk": "1~2분", "gates": ["남2문", "동2문", "북2문"], "station": "5·9호선 올림픽공원역"},
+    "K-아트홀": {"en": "K-Art Hall (Taekwondo Theater)", "capacityNote": "", "lot": "P1", "lotSpaces": 562, "walk": "3~4분", "gates": ["남2문", "동2문", "북2문"], "station": "5·9호선 올림픽공원역"},
+    "뮤즈라이브": {"en": "Muse Live", "capacityNote": "소공연장", "lot": "P2, 올림픽홀 지하주차장", "lotSpaces": 320, "walk": "1~2분", "gates": ["동2문", "남2문", "북2문"], "station": "5·9호선 올림픽공원역", "note": "올림픽홀 안내 기준"},
+    "88잔디마당": {"en": "88 Lawn Field", "capacityNote": "옥외", "lot": "P1", "lotSpaces": 562, "walk": "", "gates": ["남2문", "동2문", "북2문"], "station": "8호선 몽촌토성역"},
+    "88호수 수변무대": {"en": "88 Lake Waterside Stage", "capacityNote": "옥외", "lot": "P1", "lotSpaces": 562, "walk": "", "gates": ["남2문"], "station": "8호선 몽촌토성역"},
+    "평화의 광장": {"en": "World Peace Plaza", "capacityNote": "옥외", "lot": "", "lotSpaces": null, "walk": "", "gates": [], "station": "8호선 몽촌토성역 1번 출구"},
+    "옥외·기타": {"en": "Outdoor / Other", "capacityNote": "", "lot": "", "lotSpaces": null, "walk": "", "gates": [], "station": "5·9호선 올림픽공원역"},
+    "미상": {"en": "Unknown", "capacityNote": "", "lot": "", "lotSpaces": null, "walk": "", "gates": [], "station": ""}
+  },
+  "alternatives": [
+    {"ko": "공연 당일은 주차장 출입문(북2·동2·남2문) 앞 도로가 막힙니다. 지하철 5·9호선 올림픽공원역이 공연장까지 걸어서 5~10분입니다.", "en": "On show days the roads to the three parking gates jam. Olympic Park Station (Lines 5 and 9) is a 5 to 10 minute walk to the venues."},
+    {"ko": "P1(562대)·P2(320대)가 큰 주차장입니다. 공연장 바로 옆 주차장이 차면 P1으로 돌리는 편이 빠릅니다.", "en": "P1 (562 spaces) and P2 (320) are the largest lots. If the lot next to the venue is full, P1 is usually the quickest fallback."},
+    {"ko": "공연 티켓이 있어도 주차 할인은 없습니다. 10분당 600원, 하루 최대 2만 원입니다.", "en": "No parking discount for ticket holders. 600 won per 10 minutes, capped at 20,000 won a day."}
+  ]
+}

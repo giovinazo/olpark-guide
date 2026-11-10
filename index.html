@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>올림픽공원 공연·주차 길잡이</title>
+<meta name="description" content="올림픽공원 공연 일정을 표준화해 보여 주고, 공연일 시간대별 주차 혼잡 예보와 대중교통 대안을 안내합니다.">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-inner">
+    <a class="brand" href="#schedule">
+      <span class="brand-mark">OP</span>
+      <span class="brand-text" data-i18n="brand">올림픽공원 공연·주차 길잡이</span>
+    </a>
+    <div class="top-right">
+      <button class="lang" id="langBtn" type="button" aria-label="Switch language">EN</button>
+    </div>
+  </div>
+  <nav class="wrap tabs" role="tablist">
+    <a href="#schedule" class="tab is-on" data-tab="schedule" data-i18n="tab.schedule">공연 일정</a>
+    <a href="#forecast" class="tab" data-tab="forecast" data-i18n="tab.forecast">주차 혼잡 예보</a>
+    <a href="#quality" class="tab" data-tab="quality" data-i18n="tab.quality">데이터 점검판</a>
+  </nav>
+</header>
+
+<main class="wrap">
+  <!-- 1. 공연 일정 -->
+  <section id="schedule" class="panel is-on">
+    <div class="panel-head">
+      <h1 data-i18n="schedule.title">다가오는 공연</h1>
+      <p class="muted" data-i18n="schedule.sub">공공데이터의 공연장 이름을 하나로 맞추고 기간을 날짜별로 풀어 보여 줍니다.</p>
+    </div>
+    <div class="chips" id="venueChips"></div>
+    <div id="scheduleList" class="list"></div>
+    <p class="muted small" id="scheduleNote"></p>
+  </section>
+
+  <!-- 2. 주차 혼잡 예보 -->
+  <section id="forecast" class="panel">
+    <div class="panel-head">
+      <h1 data-i18n="forecast.title">주차 혼잡 예보</h1>
+      <p class="muted" data-i18n="forecast.sub">요일·시간·대형 공연 유무·비로 그 시간대 들어오는 차량 수준을 예상합니다. 2024년 7월 입출차 21만 5천 건을 기준으로 추정했습니다.</p>
+    </div>
+    <form class="controls" id="fcForm" onsubmit="return false">
+      <label><span data-i18n="forecast.date">날짜</span><input type="date" id="fcDate"></label>
+      <label><span data-i18n="forecast.hour">시각</span><select id="fcHour"></select></label>
+      <label><span data-i18n="forecast.venue">공연장</span><select id="fcVenue"></select></label>
+      <label class="toggle"><span data-i18n="forecast.rain">비 예보</span>
+        <span class="seg"><button type="button" data-rain="0" class="is-on" data-i18n="forecast.clear">맑음</button><button type="button" data-rain="1" data-i18n="forecast.rainy">비</button></span>
+      </label>
+    </form>
+    <div class="result" id="fcResult"></div>
+    <div class="hourstrip" id="fcStrip"></div>
+    <div class="grid2">
+      <div class="card" id="fcParking"></div>
+      <div class="card" id="fcTransit"></div>
+    </div>
+    <div class="card soft" id="fcTips"></div>
+  </section>
+
+  <!-- 3. 데이터 점검판 -->
+  <section id="quality" class="panel">
+    <div class="panel-head">
+      <h1 data-i18n="quality.title">데이터 점검판</h1>
+      <p class="muted" data-i18n="quality.sub">서비스가 공연 자료를 받을 때 자동으로 걸러 낸 항목입니다. 표기 통일과 빈칸 보완이 필요한 곳을 보여 줍니다.</p>
+    </div>
+    <div class="stats" id="qStats"></div>
+    <div class="grid2">
+      <div class="card" id="qIssues"></div>
+      <div class="card" id="qVariants"></div>
+    </div>
+    <div class="card soft" id="qNotes"></div>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <p id="footSource"></p>
+  <p class="muted small" data-i18n="foot.disclaimer">예보는 과거 입출차 기록으로 추정한 값이며 실제 주차 가능 대수와 다를 수 있습니다. 공연 정보는 기관 누리집 원문을 확인하십시오.</p>
+</footer>
+<script src="assets/app.js"></script>
+</body>
+</html>

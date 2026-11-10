@@ -1,0 +1,116 @@
+{
+ "generated": "2026-11-10 22:55",
+ "total": 2780,
+ "clean": 877,
+ "counts": {
+  "venue_blank": 107,
+  "duration_blank": 1348,
+  "venue_variant": 987,
+  "duration_unparsed": 27,
+  "non_show": 812,
+  "venue_unmatched": 8,
+  "duplicate": 205
+ },
+ "recent": {
+  "from": "2024-01-01",
+  "total": 385,
+  "clean": 143,
+  "counts": {
+   "venue_variant": 165,
+   "duration_blank": 115,
+   "venue_unmatched": 1,
+   "duration_unparsed": 5
+  },
+  "venueVariants": [
+   {
+    "raw": "올림픽공원 올림픽홀",
+    "canonical": "올림픽홀",
+    "n": 54
+   },
+   {
+    "raw": "올림픽핸드볼경기장",
+    "canonical": "핸드볼경기장",
+    "n": 22
+   },
+   {
+    "raw": "KSPO DOME(올림픽체조경기장)",
+    "canonical": "KSPO DOME",
+    "n": 17
+   },
+   {
+    "raw": "올림픽공원 우리금융아트홀",
+    "canonical": "우리금융아트홀",
+    "n": 13
+   },
+   {
+    "raw": "올림픽공원 內 올림픽홀",
+    "canonical": "올림픽홀",
+    "n": 5
+   },
+   {
+    "raw": "티켓링크 라이브 아레나",
+    "canonical": "핸드볼경기장",
+    "n": 5
+   },
+   {
+    "raw": "올림픽공원 88잔디마당",
+    "canonical": "88잔디마당",
+    "n": 4
+   },
+   {
+    "raw": "티켓링크 라이브 아레나 (구 올림픽공원 핸드볼경기장)",
+    "canonical": "핸드볼경기장",
+    "n": 4
+   },
+   {
+    "raw": "티켓링크 라이브 아레나 (올림픽공원 핸드볼경기장)",
+    "canonical": "핸드볼경기장",
+    "n": 4
+   },
+   {
+    "raw": "티켓링크 라이브 아레나 (올림픽 핸드볼경기장)",
+    "canonical": "핸드볼경기장",
+    "n": 4
+   },
+   {
+    "raw": "KSPODOME",
+    "canonical": "KSPO DOME",
+    "n": 3
+   },
+   {
+    "raw": "티켓링크 라이브 아레나 (핸드볼경기장)",
+    "canonical": "핸드볼경기장",
+    "n": 3
+   },
+   {
+    "raw": "올림픽공원 KSPO DOME",
+    "canonical": "KSPO DOME",
+    "n": 3
+   },
+   {
+    "raw": "올림픽공원 핸드볼경기장",
+    "canonical": "핸드볼경기장",
+    "n": 2
+   },
+   {
+    "raw": "KSPO DOME(올림픽체조경기장), 88잔디마당",
+    "canonical": "KSPO DOME",
+    "n": 1
+   }
+  ]
+ },
+ "venues": {
+  "미상": 115,
+  "우리금융아트홀": 202,
+  "KSPO DOME": 663,
+  "옥외·기타": 39,
+  "올림픽홀": 799,
+  "뮤즈라이브": 269,
+  "88호수 수변무대": 22,
+  "88잔디마당": 75,
+  "핸드볼경기장": 451,
+  "평화의 광장": 3,
+  "K-아트홀": 142
+ },
+ "rawVenueKinds": 119
+}
