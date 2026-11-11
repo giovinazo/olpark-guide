@@ -11,7 +11,7 @@
       brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
       todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
       levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "공연장 옆 주차장이 찰 가능성이 큽니다. 30분 일찍 오거나 P1(562대)을 바로 이용하십시오.", "주차장 진입 도로까지 막히는 시간대입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
-      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo != null ? `${lo}~` : ""}${hi != null ? `${hi}대` : "대 이상"}/시간`,
+      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
       sourcesH: "활용 데이터", sources: [
         ["한국체육산업개발(주) 올림픽공원 입출차 정보(2024년 7월)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["한국체육산업개발(주) 올림픽공원 영문 공연정보", "https://www.data.go.kr/data/15149169/fileData.do"],
@@ -55,7 +55,7 @@
       brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
       todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
       levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "The lot next to the venue will likely fill up. Arrive 30 minutes early or go straight to P1 (562 spaces).", "Roads to the parking gates jam at this hour. Take the subway (Olympic Park Station, Lines 5 and 9)."],
-      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo != null ? `${lo}–` : ""}${hi != null ? `${hi}` : "+"} cars/h`,
+      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
       sourcesH: "Data sources", sources: [
         ["KSPO&CO Olympic Park gate records (July 2024)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["KSPO&CO Olympic Park English show information", "https://www.data.go.kr/data/15149169/fileData.do"],
