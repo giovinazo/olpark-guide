@@ -8,7 +8,20 @@
 
   const I18N = {
     ko: {
-      brand: "올림픽공원 공연·주차 길잡이", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
+      brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
+      todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
+      levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "공연장 옆 주차장이 찰 가능성이 큽니다. 30분 일찍 오거나 P1(562대)을 바로 이용하십시오.", "주차장 진입 도로까지 막히는 시간대입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
+      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo != null ? `${lo}~` : ""}${hi != null ? `${hi}대` : "대 이상"}/시간`,
+      sourcesH: "활용 데이터", sources: [
+        ["한국체육산업개발(주) 올림픽공원 입출차 정보(2024년 7월)", "https://www.data.go.kr/data/15138735/fileData.do"],
+        ["한국체육산업개발(주) 올림픽공원 영문 공연정보", "https://www.data.go.kr/data/15149169/fileData.do"],
+        ["한국체육산업개발(주) 올림픽공원 주차장 혼잡도 정보·월별 주차현황", "https://www.data.go.kr/data/15164156/fileData.do"],
+        ["한국문화정보원 문화 공공데이터광장 통합 공연정보(API_CCA_144) 중 한국체육산업개발(주) 분", "https://www.culture.go.kr/data/openapi/openapiList.do"],
+        ["기상청 단기예보 조회서비스(올림픽공원 격자 62·126)", "https://www.data.go.kr/data/15084084/openapi.do"],
+        ["기상청 지상(종관, ASOS) 시간자료(서울 108, 모델 추정용)", "https://www.data.go.kr/data/15057210/openapi.do"],
+        ["한국천문연구원 특일 정보(공휴일)", "https://www.data.go.kr/data/15012690/openapi.do"],
+        ["올림픽공원 누리집 공연 일정안내·주차 안내(회차 시각·주차장 위치)", "https://www.ksponco.or.kr/olympicpark/"],
+      ],
       "schedule.title": "다가오는 공연", "schedule.sub": "공공데이터의 공연장 이름을 하나로 맞추고 기간을 날짜별로 풀어 보여 줍니다.",
       "forecast.title": "주차 혼잡 예보", "forecast.sub": "요일·시간·대형 공연 유무·비로 그 시간대 들어오는 차량 수준을 예상합니다. 2024년 7월 입출차 21만 5천 건을 기준으로 추정했습니다.",
       "forecast.date": "날짜", "forecast.hour": "시각", "forecast.venue": "공연장", "forecast.rain": "비 예보", "forecast.clear": "맑음", "forecast.rainy": "비",
@@ -39,7 +52,20 @@
       source: (u) => `자료: 한국체육산업개발(주) 개방 공공데이터(공연정보·입출차·주차 안내), 한국문화정보원 통합 공연정보, 기상청 지상관측, 한국천문연구원 특일 정보 · 공연 자료 갱신 ${u}`,
     },
     en: {
-      brand: "Olympic Park Show & Parking Guide", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
+      brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
+      todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
+      levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "The lot next to the venue will likely fill up. Arrive 30 minutes early or go straight to P1 (562 spaces).", "Roads to the parking gates jam at this hour. Take the subway (Olympic Park Station, Lines 5 and 9)."],
+      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo != null ? `${lo}–` : ""}${hi != null ? `${hi}` : "+"} cars/h`,
+      sourcesH: "Data sources", sources: [
+        ["KSPO&CO Olympic Park gate records (July 2024)", "https://www.data.go.kr/data/15138735/fileData.do"],
+        ["KSPO&CO Olympic Park English show information", "https://www.data.go.kr/data/15149169/fileData.do"],
+        ["KSPO&CO Olympic Park parking congestion and monthly parking", "https://www.data.go.kr/data/15164156/fileData.do"],
+        ["KCISA Culture Public Data Plaza integrated performance API (API_CCA_144), KSPO&CO records", "https://www.culture.go.kr/data/openapi/openapiList.do"],
+        ["KMA short-term forecast (Olympic Park grid 62, 126)", "https://www.data.go.kr/data/15084084/openapi.do"],
+        ["KMA ASOS hourly observations (Seoul 108, for the model)", "https://www.data.go.kr/data/15057210/openapi.do"],
+        ["KASI public holidays", "https://www.data.go.kr/data/15012690/openapi.do"],
+        ["Olympic Park website schedule and parking pages (showtimes, lot locations)", "https://www.ksponco.or.kr/olympicpark/"],
+      ],
       "schedule.title": "Upcoming shows", "schedule.sub": "Venue names from open data are unified and multi-day runs are expanded by date.",
       "forecast.title": "Parking forecast", "forecast.sub": "Expected inbound traffic by weekday, hour, major show and rain, estimated from 215,528 gate records of July 2024.",
       "forecast.date": "Date", "forecast.hour": "Hour", "forecast.venue": "Venue", "forecast.rain": "Rain", "forecast.clear": "Clear", "forecast.rainy": "Rain",
@@ -138,6 +164,20 @@
       .concat(order.map(v => `<button class="chip ${state.venue === v ? "is-on" : ""}" data-v="${v}">${venueName(v)} <span class="small">${counts[v]}</span></button>`)).join("");
     $$("#venueChips .chip").forEach(b => b.onclick = () => { state.venue = b.dataset.v; renderSchedule(); });
   }
+  const venueClass = v => ({ "KSPO DOME": "v-dome", "핸드볼경기장": "v-hand", "올림픽홀": "v-hall", "우리금융아트홀": "v-art", "K-아트홀": "v-art", "뮤즈라이브": "v-hall" }[v] || "v-other");
+  function renderToday() {
+    const el = $("#todayStrip"); if (!el) return;
+    const todays = DATA.shows.shows.filter(s => isShow(s) && s.start <= today && s.end >= today && (!detailOf(s) || !detailOf(s).sessionDays.length || detailOf(s).sessionDays.includes(today)));
+    const nextBig = DATA.shows.shows.filter(s => isShow(s) && s.big && s.end >= today).sort((a, b) => a.start.localeCompare(b.start))[0];
+    const wd = DATA.weather && DATA.weather.days && DATA.weather.days[today];
+    const tile = (k, v, wrap) => `<div class="t"><div class="k">${k}</div><div class="v ${wrap ? "wrap2" : ""}">${v}</div></div>`;
+    el.innerHTML = tile(T("todayShows"), todays.length ? `${T("countShows")(todays.length)} · ${esc(todays.map(s => showTitle(s)).join(", "))}` : T("todayNone"), true)
+      + (nextBig ? tile(T("nextBig"), `${fmtDate(Math.max(nextBig.start, today) === today ? today : nextBig.start)} · ${venueName(nextBig.venue)}<br><span class="muted small">${esc(showTitle(nextBig))}</span>`, true) : "")
+      + (wd ? tile(T("todayWx"), `${wd.rainHours.length ? T("wxRainH")(+wd.rainHours[0]) : T("wxDry")} · ${T("wxPop")(wd.popMax ?? 0)}${wd.tmin != null ? ` · ${wd.tmin}~${wd.tmax}℃` : ""}`, true) : "");
+  }
+  function renderSources() {
+    $("#footSources").innerHTML = `<h4>${T("sourcesH")}</h4><ul>${T("sources").map(([n, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join("")}</ul>`;
+  }
   function renderSchedule() {
     renderChips();
     const list = upcoming().filter(s => state.venue === "all" || s.venue === state.venue);
@@ -156,14 +196,14 @@
     });
     const keys = Object.keys(byDay).sort();
     if (!keys.length) { $("#scheduleList").innerHTML = `<div class="empty">${T("noUpcoming")}</div>`; $("#scheduleNote").textContent = ""; return; }
-    $("#scheduleList").innerHTML = keys.map(k => `<div class="day ${k === today ? "today" : ""}">${fmtDate(k)}${k === today ? ` · ${T("today")}` : ""}</div>` +
+    $("#scheduleList").innerHTML = keys.map(k => `<div class="day ${k === today ? "today" : ""} ${dayKind(k)}">${fmtDate(k)}${k === today ? `<span class="pill">${T("today")}</span>` : ""}</div>` +
       byDay[k].sort((a, b) => (b.big - a.big) || a.title.localeCompare(b.title)).map(s => { const det = detailOf(s); const times = timesOn(s, k); return `
       <article class="show">
         <div>
           <p class="title">${times.map(t => `<span class="time">${t}</span>`).join(" ")}${times.length ? " " : ""}${esc(showTitle(s))}</p>
           ${subTitle(s) ? `<p class="sub muted small">${esc(subTitle(s))}</p>` : ""}
           <div class="meta">
-            <span>${venueName(s.venue)}</span>
+            <span class="venue ${venueClass(s.venue)}">${venueName(s.venue)}</span>
             <span>${fmtDate(s.start)}${s.start !== s.end ? ` ~ ${fmtDate(s.end)} · ${s.days}${T("days")}` : ""}</span>
             ${s.durationMin ? `<span>${s.durationMin}${T("min")}</span>` : ""}
             ${s.big ? `<span class="tag big">${T("bigShow")}</span>` : ""}
@@ -224,15 +264,20 @@
     const lvName = (lang === "ko" ? DATA.model.levels : DATA.model.levelsEn)[lv];
     const basisTxt = { d: T("basisD"), r: T("basisR"), s: T("basisS") }[basis];
     $("#fcResult").innerHTML = `
-      <div class="level l${lv}">${lvName}</div>
+      <div class="level l${lv}">${lvName}<small>${T("expected")(n)}</small></div>
       <div>
         <p class="big">${fmtDate(date)} ${pad(hour)}:00 · ${T("dayKind")[dayKind(date)]}${rain ? ` · ${T("forecast.rainy")}` : ""}</p>
-        <p class="why">${T("expected")(n)} · ${T("basis")(cnt, basisTxt)}</p>
+        <p class="tip">${T("levelTip")[lv]}</p>
+        <p class="why">${T("basis")(cnt, basisTxt)}</p>
         <p class="why">${big ? T("bigOn")(bigs.map(s => { const t = timesOn(s, date); return `${venueName(s.venue)}(${esc(s.title)}${t.length ? `, ${t.join("·")}` : ""})`; }).join(", ")) : T("bigOff")}</p>
         ${(() => { const t = [...new Set(DATA.shows.shows.filter(s => isShow(s) && s.venue === venue && s.start <= date && s.end >= date).flatMap(s => timesOn(s, date)))].sort(); return t.length ? `<p class="why">${T("startAt")(venueName(venue), t.join(" · "))}</p>` : ""; })()}
         ${wxLine}
       </div>`;
-    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""}" title="${pad(h)}:00 ${r[0]}${rh ? " ☂" : ""}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
+    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""} ${rh ? "rain" : ""}" title="${pad(h)}:00 · ${r[0]}${rh ? " ☂" : ""}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
+    $("#stripTitle").textContent = T("stripTitle"); $("#stripHint").textContent = T("stripHint");
+    const th = Object.values(DATA.model.thresholds || {});
+    const lvNames = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;
+    $("#fcLegend").innerHTML = lvNames.map((nm, i) => `<span><i class="l${i}"></i>${T("legendLv")(nm, i === 0 ? null : th[i - 1], i < th.length ? th[i] - 1 : null)}</span>`).join("");
     $$("#fcStrip div").forEach((el, h) => el.onclick = () => { state.fc.hour = h; syncForecastForm(); renderForecast(); });
     const v = DATA.venues.venues[venue] || {};
     $("#fcParking").innerHTML = `<h3>${T("parkingH")} · ${venueName(venue)}</h3>` + (v.lot ? `<dl class="kv">
@@ -289,7 +334,7 @@
 
   function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
-  function renderAll() { applyI18n(); renderSchedule(); initForecastForm(); renderForecast(); renderQuality(); $("#footSource").textContent = T("source")(DATA.shows.updated); }
+  function renderAll() { applyI18n(); renderToday(); renderSchedule(); initForecastForm(); renderForecast(); renderQuality(); renderSources(); $("#footSource").textContent = T("source")(DATA.shows.updated); }
 
   load().then(() => {
     renderAll();

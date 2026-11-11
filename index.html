@@ -5,23 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>올림픽공원 공연·주차 길잡이</title>
 <meta name="description" content="올림픽공원 공연 일정을 표준화해 보여 주고, 공연일 시간대별 주차 혼잡 예보와 대중교통 대안을 안내합니다.">
+<meta name="theme-color" content="#1f5fbf">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f5fbf'/%3E%3Cpath d='M10 24V8h7.5a5 5 0 0 1 0 10H14v6z' fill='none' stroke='%23fff' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <header class="top">
   <div class="wrap top-inner">
     <a class="brand" href="#schedule">
-      <span class="brand-mark">OP</span>
-      <span class="brand-text" data-i18n="brand">올림픽공원 공연·주차 길잡이</span>
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 19V5h5.5a4 4 0 0 1 0 8H10v6"/></svg></span>
+      <span class="brand-text"><b data-i18n="brand">올림픽공원 공연·주차 길잡이</b><span data-i18n="tagline">공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검</span></span>
     </a>
     <div class="top-right">
       <button class="lang" id="langBtn" type="button" aria-label="Switch language">EN</button>
     </div>
   </div>
   <nav class="wrap tabs" role="tablist">
-    <a href="#schedule" class="tab is-on" data-tab="schedule" data-i18n="tab.schedule">공연 일정</a>
-    <a href="#forecast" class="tab" data-tab="forecast" data-i18n="tab.forecast">주차 혼잡 예보</a>
-    <a href="#quality" class="tab" data-tab="quality" data-i18n="tab.quality">데이터 점검판</a>
+    <a href="#schedule" class="tab is-on" data-tab="schedule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span data-i18n="tab.schedule">공연 일정</span></a>
+    <a href="#forecast" class="tab" data-tab="forecast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l1.5-4.5A2 2 0 0 1 8.4 7h7.2a2 2 0 0 1 1.9 1.5L19 13"/><rect x="3" y="13" width="18" height="6" rx="1.5"/><path d="M6 19v1.5M18 19v1.5"/><circle cx="7.5" cy="16" r=".8"/><circle cx="16.5" cy="16" r=".8"/></svg><span data-i18n="tab.forecast">주차 혼잡 예보</span></a>
+    <a href="#quality" class="tab" data-tab="quality"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l2 2 4-4"/><rect x="4" y="4" width="16" height="16" rx="3"/></svg><span data-i18n="tab.quality">데이터 점검판</span></a>
   </nav>
 </header>
 
@@ -32,6 +34,7 @@
       <h1 data-i18n="schedule.title">다가오는 공연</h1>
       <p class="muted" data-i18n="schedule.sub">공공데이터의 공연장 이름을 하나로 맞추고 기간을 날짜별로 풀어 보여 줍니다.</p>
     </div>
+    <div class="today" id="todayStrip"></div>
     <div class="chips" id="venueChips"></div>
     <div id="scheduleList" class="list"></div>
     <p class="muted small" id="scheduleNote"></p>
@@ -52,7 +55,9 @@
       </label>
     </form>
     <div class="result" id="fcResult"></div>
+    <div class="striphead"><span id="stripTitle"></span><span id="stripHint" class="small"></span></div>
     <div class="hourstrip" id="fcStrip"></div>
+    <div class="legend" id="fcLegend"></div>
     <div class="grid2">
       <div class="card" id="fcParking"></div>
       <div class="card" id="fcTransit"></div>
@@ -78,6 +83,7 @@
 </main>
 
 <footer class="wrap foot">
+  <div id="footSources"></div>
   <p id="footSource"></p>
   <p class="muted small" data-i18n="foot.disclaimer">예보는 과거 입출차 기록으로 추정한 값이며 실제 주차 가능 대수와 다를 수 있습니다. 공연 정보는 기관 누리집 원문을 확인하십시오.</p>
 </footer>
