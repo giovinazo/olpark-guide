@@ -26,6 +26,9 @@
       sessRead: "읽은 상세 글", sessGot: "시각 확보", sessBlank: "빈칸·추후 공지", sessErr: "표기 오류", sessShow: "공연", sessRaw: "원문", sessProblem: "문제", sessFix: "정정안",
       sessIssue: { date_outside: "날짜가 공연 기간 밖(월 오기 추정)", weekday_mismatch: "요일이 날짜와 다름", weekday_blank: "요일 빈칸", time_format: "시각 표기 불완전('시' 누락)", time_leftover: "해석 못 한 시각 표기", time_unparsed: "시각 해석 불가", date_invalid: "없는 날짜", period_mismatch: "공공데이터와 누리집 기간 불일치", time_blank: "시각 빈칸", time_tbd: "추후 공지", partial_days: "기간 중 일부 날만 회차", note: "비고", page_error: "누리집 상세 글 열리지 않음(서버 오류)" },
       sessNote: "오류로 잡힌 글은 화면에 '시각 표기 점검' 꼬리표를 붙이고, 정정안이 있으면 정정안 날짜로 회차를 잡습니다. 원문은 기관 누리집에서 확인하십시오.",
+      titlesH: "영문 제목 연결(기관 영문 게시판)", titlesSub: "개방 데이터 '영문 공연정보'(15149169)의 원천인 기관 영문 누리집 Culture Info 게시판을 읽어, 공연정보와 날짜·제목 낱말 겹침으로 짝을 짓습니다. 영어 화면에서는 이 제목과 외국인용 예매처 링크를 씁니다.",
+      teItems: "영문 게시판 글", teLinked: "공연정보와 연결", teUpcoming: "다가오는 공연 연결", teKoOnEn: "영문 글인데 한국어 제목(2026년~)", teDate: "날짜", teTitle: "영문 게시판 제목 그대로",
+      teNote: n => `제목 낱말이 안 겹치면 시작일이 같은 공연이 하나뿐일 때만 날짜로 연결합니다(${n}건, 점수 0.2). 한국어 제목 그대로인 영문 글은 외국인 관람객이 검색하지 못하는 항목입니다.`,
       statTotal: "전체 공연 자료", statClean: "문제 없는 자료", statRecent: "2024년 이후", statVenueRaw: "공연장 표기 종류",
       issuesH: "자동 점검 결과", variantsH: "공연장 표기 통일(2024년 이후)", raw: "원문 표기", canonical: "표준명", count: "건",
       issue: { venue_variant: "공연장 표기가 표준명과 다름", venue_blank: "공연장 빈칸·자리표", venue_unmatched: "공연장 판별 불가", non_show: "공연이 아닌 항목(대관 준비·예약 자리표)", duration_blank: "공연 시간 빈칸·자리표", duration_unparsed: "공연 시간 해석 불가", duplicate: "같은 제목·기간 중복 등록", period_unparsed: "기간 해석 불가" },
@@ -51,6 +54,9 @@
       sessRead: "Pages read", sessGot: "Showtimes found", sessBlank: "Blank / TBA", sessErr: "Text errors", sessShow: "Show", sessRaw: "As written", sessProblem: "Problem", sessFix: "Suggested fix",
       sessIssue: { date_outside: "Date outside show period (wrong month?)", weekday_mismatch: "Weekday does not match date", weekday_blank: "Weekday blank", time_format: "Incomplete time text", time_leftover: "Unparsed time text", time_unparsed: "Time not parseable", date_invalid: "Invalid date", period_mismatch: "Period differs from open data", time_blank: "Time blank", time_tbd: "To be announced", partial_days: "Showtimes on only some days", note: "Note", page_error: "Official page fails to load (server error)" },
       sessNote: "Flagged pages get a 'Time text check' tag on the schedule; when a fix is suggested, the showtime is placed on the corrected date. Check the official page for the original text.",
+      titlesH: "English titles (official English board)", titlesSub: "The open dataset 'English show information' (15149169) is an export of the official English Culture Info board. The service reads that board and pairs each post with a show record by date and title word overlap. The English view uses these titles and the English ticketing links.",
+      teItems: "English board posts", teLinked: "Linked to show records", teUpcoming: "Upcoming shows linked", teKoOnEn: "English posts titled only in Korean (2026+)", teDate: "Date", teTitle: "Title as posted on the English board",
+      teNote: n => `When no title words overlap, a post is linked by date only if exactly one show starts that day (${n} posts, score 0.2). Korean-only titles on the English board cannot be found by foreign visitors.`,
       statTotal: "Show records", statClean: "Clean records", statRecent: "Since 2024", statVenueRaw: "Venue spellings",
       issuesH: "Automatic checks", variantsH: "Venue name unification (since 2024)", raw: "As written", canonical: "Standard", count: "n",
       issue: { venue_variant: "Venue differs from standard name", venue_blank: "Venue blank / placeholder", venue_unmatched: "Venue not recognised", non_show: "Not a show (booking placeholders)", duration_blank: "Running time blank", duration_unparsed: "Running time unreadable", duplicate: "Duplicate title and period", period_unparsed: "Period unreadable" },
@@ -66,7 +72,7 @@
   const state = { venue: "all", fc: { date: today, hour: 17, venue: "KSPO DOME", rain: 0 } };
 
   async function load() {
-    const names = ["shows", "model", "venues", "quality", "holidays", "details"];
+    const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en"];
     const res = await Promise.all(names.map(n => fetch(`data/${n}.json`).then(r => r.json())));
     names.forEach((n, i) => DATA[n] = res[i]);
     DATA.holidaySet = new Set(DATA.holidays.holidays.map(String));
@@ -79,6 +85,10 @@
   const timesOn = (s, k) => { const d = detailOf(s); return d ? d.sessions.filter(x => x.date === k).map(x => x.time) : []; };
   const hasErr = d => d && d.checks.some(c => ERR_KINDS.includes(c.kind));
   const hourBefore = (times, fallback = 17) => { if (!times.length) return fallback; const h = +times[0].slice(0, 2); return Math.min(21, Math.max(6, h - 2)); };
+  /* 영문 제목·영문 예매처(기관 영문 게시판) */
+  const enOf = s => (DATA.titles_en && DATA.titles_en.byId[s.id]) || null;
+  const showTitle = s => { const e = enOf(s); return lang === "en" && e && e.en !== s.title ? e.en : s.title; };
+  const subTitle = s => { const e = enOf(s); return lang === "en" && e && e.en !== s.title ? s.title : ""; };
 
   /* ---------- 공통 ---------- */
   function applyI18n() {
@@ -131,7 +141,8 @@
       byDay[k].sort((a, b) => (b.big - a.big) || a.title.localeCompare(b.title)).map(s => { const det = detailOf(s); const times = timesOn(s, k); return `
       <article class="show">
         <div>
-          <p class="title">${times.map(t => `<span class="time">${t}</span>`).join(" ")}${times.length ? " " : ""}${esc(s.title)}</p>
+          <p class="title">${times.map(t => `<span class="time">${t}</span>`).join(" ")}${times.length ? " " : ""}${esc(showTitle(s))}</p>
+          ${subTitle(s) ? `<p class="sub muted small">${esc(subTitle(s))}</p>` : ""}
           <div class="meta">
             <span>${venueName(s.venue)}</span>
             <span>${fmtDate(s.start)}${s.start !== s.end ? ` ~ ${fmtDate(s.end)} · ${s.days}${T("days")}` : ""}</span>
@@ -144,7 +155,7 @@
         </div>
         <div class="acts">
           <button class="btn primary" data-fc="${k}|${s.venue}|${hourBefore(times)}">${T("forecastBtn")}</button>
-          ${det && det.booking ? `<a class="btn" href="${esc(det.booking)}" target="_blank" rel="noopener">${T("booking")}</a>` : ""}
+          ${(() => { const e = enOf(s); const u = lang === "en" && e && e.ticket ? e.ticket : (det && det.booking); return u ? `<a class="btn" href="${esc(u)}" target="_blank" rel="noopener">${T("booking")}${lang === "en" && e && e.ticket ? " (EN)" : ""}</a>` : ""; })()}
           ${s.url ? `<a class="btn" href="${esc(s.url)}" target="_blank" rel="noopener">${T("official")}</a>` : ""}
         </div>
       </article>`; }).join("")).join("");
@@ -233,6 +244,19 @@
       <table><tr><th>${T("sessShow")}</th><th>${T("sessRaw")}</th><th>${T("sessProblem")}</th><th>${T("sessFix")}</th></tr>` +
       errs.map(({ d, c }) => `<tr><td>${esc(d.title.slice(0, 28))}${d.title.length > 28 ? "…" : ""}<div class="small muted">${esc(d.period)}</div></td><td>${esc(c.text)}</td><td>${T("sessIssue")[c.kind] || c.kind}</td><td>${esc(c.fix || "")}</td></tr>`).join("") +
       `</table><p class="muted small">${T("sessNote")}</p>`;
+    renderTitlesEn();
+  }
+  function renderTitlesEn() {
+    const te = DATA.titles_en;
+    if (!te) { $("#qTitles").innerHTML = ""; return; }
+    const all = Object.values(te.byId).concat(te.unmatched || []);
+    const koOnEn = all.filter(x => x.date >= "2026-01-01" && /[가-힣]/.test(x.en) && !/[A-Za-z]{3,}/.test(x.en));
+    const byDate = Object.values(te.byId).filter(x => x.how === "date").length;
+    const stat = (n, l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+    $("#qTitles").innerHTML = `<h3>${T("titlesH")}</h3><p class="muted small">${T("titlesSub")}</p>
+      <div class="stats">${stat(te.items, T("teItems"))}${stat(`${te.linked} <span class="small muted">(${Math.round(te.linked / te.items * 100)}%)</span>`, T("teLinked"))}${stat(`${te.upcoming.linked} / ${te.upcoming.total}`, T("teUpcoming"))}${stat(koOnEn.length, T("teKoOnEn"))}</div>
+      ${koOnEn.length ? `<table><tr><th>${T("teDate")}</th><th>${T("teTitle")}</th></tr>${koOnEn.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12).map(x => `<tr><td class="num">${x.date}</td><td>${esc(x.en)}</td></tr>`).join("")}</table>` : ""}
+      <p class="muted small">${T("teNote")(byDate)}</p>`;
   }
 
   function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
