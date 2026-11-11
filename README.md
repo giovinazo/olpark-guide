@@ -19,13 +19,15 @@ data/shows.json            공연 자료(매일 갱신)
 data/quality.json          점검 결과(매일 갱신)
 data/details.json          회차 시각·예매 링크(기관 누리집 상세 글, 매일 갱신)
 data/titles_en.json        영문 제목·외국인용 예매처(기관 영문 게시판, 매일 갱신)
+data/weather.json          기상청 단기예보 3일치(올림픽공원 격자 62·126, 하루 2회 갱신)
 data/model.json            혼잡 예보 모델표(2024년 7월 입출차 기준)
 data/venues.json           공연장별 주차장·출입문·지하철
 data/holidays.json         공휴일(2024~2027, 한국천문연구원)
 scripts/build_data.py      공연 자료 수집·표준화·점검
 scripts/fetch_details.py   누리집 상세 글 수집·회차 시각 해석·표기 점검
 scripts/fetch_titles_en.py 영문 게시판 수집·공연정보와 짝짓기(날짜·제목 낱말 겹침)
-.github/workflows/         매일 06:00(KST) 자료 갱신
+scripts/fetch_weather.py   기상청 단기예보 수집(비 입력 자동 채움)
+.github/workflows/         매일 06:00·18:20(KST) 자료 갱신
 ```
 
 ## 자료 갱신
@@ -33,8 +35,9 @@ scripts/fetch_titles_en.py 영문 게시판 수집·공연정보와 짝짓기(�
 KCISA_KEY=<문화공공데이터광장 서비스키> python3 scripts/build_data.py
 python3 scripts/fetch_details.py
 python3 scripts/fetch_titles_en.py        # 처음 한 번은 --full
+KMA_KEY=<공공데이터포털 서비스키> python3 scripts/fetch_weather.py
 ```
-GitHub Actions에서는 저장소 비밀값 `KCISA_KEY`를 씁니다. 누리집 상세 글은 다가오는 공연(120일 안)만 1초 간격으로 읽고, 읽지 못하면 지난 값을 유지합니다.
+GitHub Actions에서는 저장소 비밀값 `KCISA_KEY`·`KMA_KEY`를 씁니다. 누리집 상세 글은 다가오는 공연(120일 안)만 1초 간격으로 읽고, 읽지 못하면 지난 값을 유지합니다.
 
 ## 한계
 - 예보 모델은 2024년 7월 한 달치 입출차로 추정했습니다. 2025년 입출차 API가 열리면 다시 추정합니다.

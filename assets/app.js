@@ -21,6 +21,9 @@
       dayKind: { wd: "평일", sat: "토요일", sun: "일요일·공휴일" },
       parkingH: "가까운 주차장", lot: "주차장", spaces: "대수", walk: "걸어서", gates: "진입 출입문", hours: "운영 시간", feeH: "요금", noLot: "이 공연장은 주차장 안내가 없습니다. P1(562대)을 이용하십시오.",
       transitH: "대중교통", exit: "출구", toward: "→", tipsH: "공연일 안내",
+      wxLine: (base, pop, pty, tmp) => `기상청 단기예보(${base} 발표): 강수확률 ${pop}%${pty ? ` · ${pty}` : ""}${tmp != null ? ` · ${tmp}℃` : ""}. 비 여부를 예보로 채웠습니다.`,
+      wxManual: "직접 고른 값으로 계산 중(날짜를 바꾸면 예보로 돌아감)", wxNone: last => `기상청 단기예보 범위(${last}까지) 밖이라 비 여부는 직접 고르십시오.`,
+      pty: { 0: "", 1: "비", 2: "비 또는 눈", 3: "눈", 4: "소나기" },
       timeUnknown: "시각 미확인", timeCheck: "시각 표기 점검", booking: "예매", startAt: (v, t) => `${v} 공연 시작 ${t}. 2024년 7월 기록에서는 시작 2~3시간 전부터 입차가 늘었습니다.`,
       sessionsH: "회차 시각 점검(기관 누리집 상세 글)", sessionsSub: "공공데이터에는 회차별 시작 시각이 없어 기관 누리집 공연 상세 글의 \"시간\" 칸을 읽어 날짜별 시각으로 표준화하고 표기 오류를 점검합니다. 2026년 이후 공연 전부와 다가오는 공연을 매일 다시 읽습니다.",
       sessRead: "읽은 상세 글", sessGot: "시각 확보", sessBlank: "빈칸·추후 공지", sessErr: "표기 오류", sessShow: "공연", sessRaw: "원문", sessProblem: "문제", sessFix: "정정안",
@@ -49,6 +52,9 @@
       dayKind: { wd: "Weekday", sat: "Saturday", sun: "Sunday / holiday" },
       parkingH: "Nearest parking", lot: "Lot", spaces: "Spaces", walk: "Walk", gates: "Gates", hours: "Hours", feeH: "Fee", noLot: "No lot listed for this venue. Use P1 (562 spaces).",
       transitH: "Public transport", exit: "Exit", toward: "→", tipsH: "Show-day tips",
+      wxLine: (base, pop, pty, tmp) => `KMA short-term forecast (issued ${base}): rain chance ${pop}%${pty ? ` · ${pty}` : ""}${tmp != null ? ` · ${tmp}℃` : ""}. The rain input was filled from the forecast.`,
+      wxManual: "using your manual choice (changing the date restores the forecast)", wxNone: last => `Outside the forecast range (through ${last}); choose rain manually.`,
+      pty: { 0: "", 1: "rain", 2: "rain or snow", 3: "snow", 4: "showers" },
       timeUnknown: "Time not listed", timeCheck: "Time text check", booking: "Tickets", startAt: (v, t) => `${v} show starts at ${t}. In July 2024 records, inbound traffic rose 2 to 3 hours before showtime.`,
       sessionsH: "Showtime check (official detail pages)", sessionsSub: "Open data has no per-day showtimes, so the service reads the \"time\" field of each official show page, normalises it into dated showtimes and flags text errors. All shows since 2026 plus every upcoming show are re-read daily.",
       sessRead: "Pages read", sessGot: "Showtimes found", sessBlank: "Blank / TBA", sessErr: "Text errors", sessShow: "Show", sessRaw: "As written", sessProblem: "Problem", sessFix: "Suggested fix",
@@ -69,10 +75,21 @@
   const T = k => I18N[lang][k];
 
   const DATA = {};
-  const state = { venue: "all", fc: { date: today, hour: 17, venue: "KSPO DOME", rain: 0 } };
+  const state = { venue: "all", fc: { date: today, hour: 17, venue: "KSPO DOME", rain: 0, rainMode: "auto" } };
+  /* 기상청 단기예보(3일): 그 시각의 비 여부. 없으면 null */
+  function wxAt(dateStr, hour) {
+    const w = DATA.weather; if (!w || !w.hours || !w.hours[dateStr]) return null;
+    const hs = w.hours[dateStr]; const keys = Object.keys(hs).sort();
+    if (!keys.length) return null;
+    const k = pad(hour); const pick = hs[k] ? k : (keys.filter(x => x <= k).pop() || keys[0]);  // 지난 시각은 가장 가까운 앞 시각
+    const s = hs[pick];
+    const rain = (s.pty || 0) !== 0 || (s.pop || 0) >= (w.rule ? w.rule.rainPop : 60);
+    return { ...s, hour: pick, rain: rain ? 1 : 0 };
+  }
+  function autoRain() { if (state.fc.rainMode !== "auto") return; const w = wxAt(state.fc.date, state.fc.hour); if (w) state.fc.rain = w.rain; }
 
   async function load() {
-    const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en"];
+    const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en", "weather"];
     const res = await Promise.all(names.map(n => fetch(`data/${n}.json`).then(r => r.json())));
     names.forEach((n, i) => DATA[n] = res[i]);
     DATA.holidaySet = new Set(DATA.holidays.holidays.map(String));
@@ -161,7 +178,7 @@
           ${s.url ? `<a class="btn" href="${esc(s.url)}" target="_blank" rel="noopener">${T("official")}</a>` : ""}
         </div>
       </article>`; }).join("")).join("");
-    $$("#scheduleList [data-fc]").forEach(b => b.onclick = () => { const [d, v, h] = b.dataset.fc.split("|"); state.fc.date = d; state.fc.venue = v; state.fc.hour = +h || 17; syncForecastForm(); location.hash = "#forecast"; showTab("forecast"); });
+    $$("#scheduleList [data-fc]").forEach(b => b.onclick = () => { const [d, v, h] = b.dataset.fc.split("|"); state.fc.date = d; state.fc.venue = v; state.fc.hour = +h || 17; state.fc.rainMode = "auto"; syncForecastForm(); location.hash = "#forecast"; showTab("forecast"); });
     const n = new Set(list.map(s => s.id)).size;
     $("#scheduleNote").textContent = lang === "ko" ? `${fmtDate(today)}부터 60일 안의 공연 ${n}건. 공연 자료 갱신 ${DATA.shows.updated}` : `${n} shows within 60 days from ${fmtDate(today)}. Data updated ${DATA.shows.updated}`;
   }
@@ -186,13 +203,21 @@
     $("#fcVenue").innerHTML = Object.keys(DATA.venues.venues).filter(v => !["미상", "옥외·기타"].includes(v)).map(v => `<option value="${v}">${venueName(v)}</option>`).join("");
     $("#fcDate").min = "2024-01-01";
     syncForecastForm();
-    $("#fcDate").onchange = e => { state.fc.date = e.target.value || today; renderForecast(); };
+    $("#fcDate").onchange = e => { state.fc.date = e.target.value || today; state.fc.rainMode = "auto"; renderForecast(); };
     $("#fcHour").onchange = e => { state.fc.hour = +e.target.value; renderForecast(); };
     $("#fcVenue").onchange = e => { state.fc.venue = e.target.value; renderForecast(); };
-    $$("#fcForm [data-rain]").forEach(b => b.onclick = () => { state.fc.rain = +b.dataset.rain; syncForecastForm(); renderForecast(); });
+    $$("#fcForm [data-rain]").forEach(b => b.onclick = () => { state.fc.rain = +b.dataset.rain; state.fc.rainMode = "manual"; syncForecastForm(); renderForecast(); });
   }
   function renderForecast() {
+    autoRain(); syncForecastForm();
     const { date, hour, venue, rain } = state.fc;
+    const wx = wxAt(date, hour);
+    const wxLine = (() => {
+      if (!DATA.weather) return "";
+      if (!wx) return `<p class="why">${T("wxNone")(Object.keys(DATA.weather.days || {}).sort().pop() || "")}</p>`;
+      const pty = T("pty")[wx.pty || 0] || "";
+      return `<p class="why">${T("wxLine")(DATA.weather.base, wx.pop ?? "-", pty, wx.tmp)}${state.fc.rainMode === "manual" ? ` · ${T("wxManual")}` : ""}</p>`;
+    })();
     const bigs = bigShowsOn(date);
     const big = bigs.length > 0;
     const [n, lv, cnt, basis] = lookup(date, hour, big, rain);
@@ -205,8 +230,9 @@
         <p class="why">${T("expected")(n)} · ${T("basis")(cnt, basisTxt)}</p>
         <p class="why">${big ? T("bigOn")(bigs.map(s => { const t = timesOn(s, date); return `${venueName(s.venue)}(${esc(s.title)}${t.length ? `, ${t.join("·")}` : ""})`; }).join(", ")) : T("bigOff")}</p>
         ${(() => { const t = [...new Set(DATA.shows.shows.filter(s => isShow(s) && s.venue === venue && s.start <= date && s.end >= date).flatMap(s => timesOn(s, date)))].sort(); return t.length ? `<p class="why">${T("startAt")(venueName(venue), t.join(" · "))}</p>` : ""; })()}
+        ${wxLine}
       </div>`;
-    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const r = lookup(date, h, big, rain); return `<div class="l${r[1]} ${h === hour ? "sel" : ""}" title="${pad(h)}:00 ${r[0]}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
+    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""}" title="${pad(h)}:00 ${r[0]}${rh ? " ☂" : ""}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
     $$("#fcStrip div").forEach((el, h) => el.onclick = () => { state.fc.hour = h; syncForecastForm(); renderForecast(); });
     const v = DATA.venues.venues[venue] || {};
     $("#fcParking").innerHTML = `<h3>${T("parkingH")} · ${venueName(venue)}</h3>` + (v.lot ? `<dl class="kv">
