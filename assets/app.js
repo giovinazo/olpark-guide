@@ -338,6 +338,13 @@
   function renderAll() { applyI18n(); renderToday(); renderSchedule(); initForecastForm(); renderForecast(); renderQuality(); renderSources(); $("#footSource").textContent = T("source")(DATA.shows.updated); }
 
   load().then(() => {
+    try {  // 깊은 링크: ?date=2026-11-14&hour=16&venue=KSPO%20DOME (시연·캡처용)
+      const q = new URLSearchParams(location.search);
+      if (q.get("date")) { state.fc.date = q.get("date"); state.fc.rainMode = "auto"; }
+      if (q.get("hour")) state.fc.hour = Math.min(23, Math.max(0, +q.get("hour") || 0));
+      if (q.get("venue") && DATA.venues.venues[q.get("venue")]) state.fc.venue = q.get("venue");
+      if (q.get("lang") === "en" || q.get("lang") === "ko") lang = q.get("lang");
+    } catch (e) {}
     renderAll();
     $("#langBtn").onclick = () => { lang = lang === "ko" ? "en" : "ko"; try { localStorage.setItem("olpark.lang", lang); } catch (e) {} renderAll(); };
     $$(".tab").forEach(t => t.onclick = e => { e.preventDefault(); location.hash = "#" + t.dataset.tab; showTab(t.dataset.tab); });
