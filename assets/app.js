@@ -5,6 +5,7 @@
   const pad = n => String(n).padStart(2, "0");
   const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const today = iso(new Date());
+  try { const th = new URLSearchParams(location.search).get("theme"); if (th === "light" || th === "dark") document.documentElement.dataset.theme = th; } catch (e) {}  // ?theme=light 로 밝은 화면 고정(시연·캡처용)
 
   const I18N = {
     ko: {
