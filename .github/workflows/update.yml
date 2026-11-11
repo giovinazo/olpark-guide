@@ -1,8 +1,8 @@
 name: update-data
 on:
   schedule:
-    - cron: "0 21 * * *"   # 매일 06:00 KST
-    - cron: "20 9 * * *"   # 매일 18:20 KST(17시 발표 단기예보 반영)
+    - cron: "23 21 * * *"  # 매일 06:23 KST (정각은 GitHub 혼잡으로 지연·누락이 잦아 피함)
+    - cron: "37 9 * * *"   # 매일 18:37 KST (17시 발표 단기예보 반영)
   workflow_dispatch:
 permissions:
   contents: write

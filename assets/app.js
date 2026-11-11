@@ -31,6 +31,14 @@
       all: "전체", today: "오늘", days: "일간", min: "분", official: "기관 안내", forecastBtn: "주차 예보", bigShow: "대형 공연", venueFixed: "표기 통일", noUpcoming: "다가오는 공연이 없습니다.",
       upcomingNote: (n, from, to) => `${from}부터 ${to}까지 공연 ${n}건. 자료 갱신 ${""}`,
       expected: n => `예상 입차 ${n}대/시간`, basis: (n, b) => `표본 ${n}시간 · ${b}`, basisD: "같은 조건 평균", basisR: "비 구분 없이 평균", basisS: "공연 구분 없이 평균",
+      basisV1: (b, mo) => `기준 ${b.base}대(2024년 7월 같은 요일·시각 평균)${b.showF !== 1 ? ` × 공연 ${b.showF}(시작 ${b.off < 0 ? `${-b.off}시간 전` : b.off === 0 ? "시각" : `${b.off}시간 뒤`})` : ""}${b.rainF !== 1 ? ` × 비 ${b.rainF}` : ""}${b.monthF !== 1 ? ` × ${mo}월 보정 ${b.monthF}` : ""}`,
+      modelH: "예보 모델 근거", modelNotes: (m, v) => [
+        `계산식: ${m.formula}`,
+        `기준값 72칸(요일구분 3×시각 24)·공연 효과 ${m.showEffect.factor.length}구간·비 효과는 2024년 7월 입출차 744시간으로 추정, 월 보정은 월별 주차현황(2023~2025년)의 7월 대비 비율입니다.`,
+        `공연 효과(시작 시각까지의 거리): ${m.showEffect.bins.map((b, i) => `${b}시간 ×${m.showEffect.factor[i]}`).join(", ")}. 비 효과 ×${m.rainEffect}.`,
+        v.v1 ? `검증(${v.method}): 평균 절대 오차 ${v.v1.mae}대/시간, 4단계 수준 일치 ${Math.round(v.v1.levelAgree * 100)}%. 칸 평균 방식(v0)은 ${v.cellAverage_v0.mae}대·${Math.round(v.cellAverage_v0.levelAgree * 100)}%로 정확도는 비슷하고, v1은 회차 시각을 입력으로 쓰고 근거를 풀어 보여 줍니다.` : "",
+        ...(m.limits || []),
+      ].filter(Boolean),
       bigOn: v => `이날 ${v} 공연이 있어 공연 수요를 더했습니다.`, bigOff: "이날 대형 공연장(KSPO DOME·핸드볼경기장) 공연이 없습니다.",
       dayKind: { wd: "평일", sat: "토요일", sun: "일요일·공휴일" },
       parkingH: "가까운 주차장", lot: "주차장", spaces: "대수", walk: "걸어서", gates: "진입 출입문", hours: "운영 시간", feeH: "요금", noLot: "이 공연장은 주차장 안내가 없습니다. P1(562대)을 이용하십시오.",
@@ -46,6 +54,8 @@
       titlesH: "영문 제목 연결(기관 영문 게시판)", titlesSub: "개방 데이터 '영문 공연정보'(15149169)의 원천인 기관 영문 누리집 Culture Info 게시판을 읽어, 공연정보와 날짜·제목 낱말 겹침으로 짝을 짓습니다. 영어 화면에서는 이 제목과 외국인용 예매처 링크를 씁니다.",
       teItems: "영문 게시판 글", teLinked: "공연정보와 연결", teUpcoming: "다가오는 공연 연결", teKoOnEn: "영문 글인데 한국어 제목(2026년~)", teDate: "날짜", teTitle: "영문 게시판 제목 그대로",
       teNote: n => `제목 낱말이 안 겹치면 시작일이 같은 공연이 하나뿐일 때만 날짜로 연결합니다(${n}건, 점수 0.2). 한국어 제목 그대로인 영문 글은 외국인 관람객이 검색하지 못하는 항목입니다.`,
+      filesH: "개방 파일 점검(주차장 혼잡도 정보·월별 주차현황)", filesSub: "서비스에 직접 쓰지는 않지만 같은 기관 개방 파일 2종을 받아 형식과 규모를 점검한 결과입니다.",
+      fcRows: "혼잡도 등록 행", fcTimeBug: "등록시간 분:초 = 등록일 월:일", fcDays: "등록된 날 수", fcRatio: "월별 주차현황 : 입출차(2024년 7월)",
       statTotal: "전체 공연 자료", statClean: "문제 없는 자료", statRecent: "2024년 이후", statVenueRaw: "공연장 표기 종류",
       issuesH: "자동 점검 결과", variantsH: "공연장 표기 통일(2024년 이후)", raw: "원문 표기", canonical: "표준명", count: "건",
       issue: { venue_variant: "공연장 표기가 표준명과 다름", venue_blank: "공연장 빈칸·자리표", venue_unmatched: "공연장 판별 불가", non_show: "공연이 아닌 항목(대관 준비·예약 자리표)", duration_blank: "공연 시간 빈칸·자리표", duration_unparsed: "공연 시간 해석 불가", duplicate: "같은 제목·기간 중복 등록", period_unparsed: "기간 해석 불가" },
@@ -75,6 +85,15 @@
       all: "All", today: "Today", days: "days", min: "min", official: "Official page", forecastBtn: "Parking", bigShow: "Major show", venueFixed: "Name unified", noUpcoming: "No upcoming shows.",
       upcomingNote: (n, from, to) => `${n} shows from ${from} to ${to}.`,
       expected: n => `About ${n} cars entering per hour`, basis: (n, b) => `${n} sample hours · ${b}`, basisD: "same conditions", basisR: "rain ignored", basisS: "shows ignored",
+      basisV1: (b, mo) => `Base ${b.base} cars (July 2024 average for this weekday type and hour)${b.showF !== 1 ? ` × show ${b.showF} (${b.off < 0 ? `${-b.off}h before start` : b.off === 0 ? "at start" : `${b.off}h after start`})` : ""}${b.rainF !== 1 ? ` × rain ${b.rainF}` : ""}${b.monthF !== 1 ? ` × month ${b.monthF}` : ""}`,
+      modelH: "How the forecast is made", modelNotes: (m, v) => [
+        `Formula: hourly inbound = base[weekday type][hour] × show effect[distance to showtime] × rain effect × month factor.`,
+        `The 72 base values (3 weekday types × 24 hours), ${m.showEffect.factor.length} show-effect bins and the rain effect are estimated from 744 hours of July 2024 gate records; month factors are month-to-July ratios from monthly parking totals (2023 to 2025).`,
+        `Show effect by hours to showtime: ${m.showEffect.bins.map((b, i) => `${b}h ×${m.showEffect.factor[i]}`).join(", ")}. Rain ×${m.rainEffect}.`,
+        v.v1 ? `Validation (leave-one-day-out, 31 refits): mean absolute error ${v.v1.mae} cars/h, 4-level agreement ${Math.round(v.v1.levelAgree * 100)}%. The simpler cell-average model (v0) scores ${v.cellAverage_v0.mae} and ${Math.round(v.cellAverage_v0.levelAgree * 100)}%; accuracy is similar, but v1 takes the showtime as an input and shows its reasoning.` : "",
+        "The sample is one month (8 major-show days), so seasonal and year-end demand enters only through the month factor.",
+        "All four Saturdays of July 2024 had major shows, so the Saturday baseline without a show is a model assumption.",
+      ].filter(Boolean),
       bigOn: v => `A show at ${v} that day adds concert traffic.`, bigOff: "No show at the two large venues (KSPO DOME, Handball Gymnasium) that day.",
       dayKind: { wd: "Weekday", sat: "Saturday", sun: "Sunday / holiday" },
       parkingH: "Nearest parking", lot: "Lot", spaces: "Spaces", walk: "Walk", gates: "Gates", hours: "Hours", feeH: "Fee", noLot: "No lot listed for this venue. Use P1 (562 spaces).",
@@ -90,6 +109,10 @@
       titlesH: "English titles (official English board)", titlesSub: "The open dataset 'English show information' (15149169) is an export of the official English Culture Info board. The service reads that board and pairs each post with a show record by date and title word overlap. The English view uses these titles and the English ticketing links.",
       teItems: "English board posts", teLinked: "Linked to show records", teUpcoming: "Upcoming shows linked", teKoOnEn: "English posts titled only in Korean (2026+)", teDate: "Date", teTitle: "Title as posted on the English board",
       teNote: n => `When no title words overlap, a post is linked by date only if exactly one show starts that day (${n} posts, score 0.2). Korean-only titles on the English board cannot be found by foreign visitors.`,
+      filesH: "Open file check (parking congestion, monthly parking)", filesSub: "Two more open files from the same agency, not used directly by the service, checked for format and scale.",
+      fcRows: "Congestion rows", fcTimeBug: "Time mm:ss equals date month:day", fcDays: "Days with entries", fcRatio: "Monthly total : gate records (July 2024)",
+      fcFindingEn: "In every row the minute:second part of the time field equals the month:day of the date, so the time field is not a real time; a few manual entries per day cannot serve as an hourly congestion indicator.",
+      moFindingEn: "The monthly parking total for July 2024 (59,808) is about 1/3.6 of the gate records for the same month (215,528), so the two files count different things (likely paid exits). The service uses only month-to-July ratios as a seasonal factor.",
       statTotal: "Show records", statClean: "Clean records", statRecent: "Since 2024", statVenueRaw: "Venue spellings",
       issuesH: "Automatic checks", variantsH: "Venue name unification (since 2024)", raw: "As written", canonical: "Standard", count: "n",
       issue: { venue_variant: "Venue differs from standard name", venue_blank: "Venue blank / placeholder", venue_unmatched: "Venue not recognised", non_show: "Not a show (booking placeholders)", duration_blank: "Running time blank", duration_unparsed: "Running time unreadable", duplicate: "Duplicate title and period", period_unparsed: "Period unreadable" },
@@ -116,7 +139,7 @@
   function autoRain() { if (state.fc.rainMode !== "auto") return; const w = wxAt(state.fc.date, state.fc.hour); if (w) state.fc.rain = w.rain; }
 
   async function load() {
-    const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en", "weather"];
+    const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en", "weather", "files_check"];
     const res = await Promise.all(names.map(n => fetch(`data/${n}.json`).then(r => r.json())));
     names.forEach((n, i) => DATA[n] = res[i]);
     DATA.holidaySet = new Set(DATA.holidays.holidays.map(String));
@@ -231,9 +254,32 @@
     return d.getDay() === 6 ? "sat" : "wd";
   }
   function bigShowsOn(dateStr) { return DATA.shows.shows.filter(s => isShow(s) && s.big && s.start <= dateStr && s.end >= dateStr); }
+  /* 모델 v1: 기준[요일구분][시] × 공연효과[시작까지 거리] × 비효과 × 월보정 → [예상 입차, 수준, 표본 시간, 근거] */
+  function bigStartsOn(dateStr) {
+    const kind = dayKind(dateStr);
+    const starts = bigShowsOn(dateStr).flatMap(s => timesOn(s, dateStr)).map(t => +t.slice(0, 2));
+    return starts.length ? starts : (bigShowsOn(dateStr).length ? [DATA.model.defaultStart[kind]] : []);
+  }
   function lookup(dateStr, hour, big, rain) {
-    const k = `${dayKind(dateStr)}|${hour}|${big ? 1 : 0}|${rain ? 1 : 0}`;
-    return DATA.model.table[k] || [0, 0, 0, "s"];
+    const m = DATA.model, kind = dayKind(dateStr);
+    const base = m.base[kind][hour], n = m.baseN[kind][hour];
+    let v = base, showF = 1, off = null, bin = "";
+    if (big) {
+      const starts = bigStartsOn(dateStr);
+      if (starts.length) {
+        off = starts.map(s => hour - s).sort((a, b) => Math.abs(a) - Math.abs(b))[0];
+        const i = m.showEffect.lo.findIndex((lo, j) => off >= lo && off <= m.showEffect.hi[j]);
+        showF = m.showEffect.factor[i < 0 ? m.showEffect.factor.length - 1 : i];
+        bin = m.showEffect.bins[i < 0 ? m.showEffect.factor.length - 1 : i];
+        v *= showF;
+      }
+    }
+    const rainF = rain ? m.rainEffect : 1;
+    const monthF = m.monthFactor[+dateStr.slice(5, 7) - 1] || 1;
+    v = v * rainF * monthF;
+    const th = Object.values(m.thresholds);
+    const lv = v >= th[2] ? 3 : v >= th[1] ? 2 : v >= th[0] ? 1 : 0;
+    return [Math.round(v), lv, n, { base: Math.round(base), showF, off, bin, rainF, monthF }];
   }
   function syncForecastForm() {
     $("#fcDate").value = state.fc.date; $("#fcHour").value = state.fc.hour; $("#fcVenue").value = state.fc.venue;
@@ -263,7 +309,7 @@
     const big = bigs.length > 0;
     const [n, lv, cnt, basis] = lookup(date, hour, big, rain);
     const lvName = (lang === "ko" ? DATA.model.levels : DATA.model.levelsEn)[lv];
-    const basisTxt = { d: T("basisD"), r: T("basisR"), s: T("basisS") }[basis];
+    const basisTxt = T("basisV1")(basis, +date.slice(5, 7));
     $("#fcResult").innerHTML = `
       <div class="level l${lv}">${lvName}<small>${T("expected")(n)}</small></div>
       <div>
@@ -288,6 +334,8 @@
       <dt>${T("feeH")}</dt><dd>${esc(DATA.venues.fee.small)}</dd></dl>` : `<p class="muted">${T("noLot")}</p>`);
     $("#fcTransit").innerHTML = `<h3>${T("transitH")}</h3><ul class="plain">` + DATA.venues.subway.map(s => { const e = lang === "en" ? s.en : s; return `<li><b>${esc(e.line)} ${esc(e.station)}</b>${e.exit ? ` ${esc(e.exit)}` : ""} ${T("toward")} ${esc(e.gate)}</li>`; }).join("") + `</ul>`;
     $("#fcTips").innerHTML = `<h3>${T("tipsH")}</h3><ul class="plain">` + DATA.venues.alternatives.map(a => `<li>${esc(a[lang])}</li>`).join("") + `</ul>`;
+    const m = DATA.model, val = m.validation || {};
+    $("#fcModel").innerHTML = `<h3>${T("modelH")}</h3><ul class="plain">${T("modelNotes")(m, val).map(s => `<li>${s}</li>`).join("")}</ul>`;
   }
 
   /* ---------- 3. 점검판 ---------- */
@@ -331,6 +379,16 @@
       <div class="stats">${stat(te.items, T("teItems"))}${stat(`${te.linked} <span class="small muted">(${Math.round(te.linked / te.items * 100)}%)</span>`, T("teLinked"))}${stat(`${te.upcoming.linked} / ${te.upcoming.total}`, T("teUpcoming"))}${stat(koOnEn.length, T("teKoOnEn"))}</div>
       ${koOnEn.length ? `<table><tr><th>${T("teDate")}</th><th>${T("teTitle")}</th></tr>${koOnEn.sort((a, b) => b.date.localeCompare(a.date)).slice(0, 12).map(x => `<tr><td class="num">${x.date}</td><td>${esc(x.en)}</td></tr>`).join("")}</table>` : ""}
       <p class="muted small">${T("teNote")(byDate)}</p>`;
+    renderFiles();
+  }
+  function renderFiles() {
+    const f = DATA.files_check; const el = $("#qFiles");
+    if (!f || !el) { if (el) el.innerHTML = ""; return; }
+    const c = f.congestion, mo = f.monthly;
+    const stat = (n, l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+    el.innerHTML = `<h3>${T("filesH")}</h3><p class="muted small">${T("filesSub")}</p>
+      <div class="stats">${stat(c.rows.toLocaleString(), T("fcRows"))}${stat(`${c.timeMinSecEqualsMonthDay.toLocaleString()} <span class="small muted">(${Math.round(c.timeMinSecEqualsMonthDay / c.rows * 100)}%)</span>`, T("fcTimeBug"))}${stat(c.distinctDays, T("fcDays"))}${stat(mo.ratioGateToMonthly ? `1 : ${mo.ratioGateToMonthly}` : "-", T("fcRatio"))}</div>
+      <ul class="plain"><li>${esc(lang === "ko" ? c.finding : T("fcFindingEn"))}</li><li>${esc(lang === "ko" ? mo.finding : T("moFindingEn"))}</li></ul>`;
   }
 
   function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
