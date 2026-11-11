@@ -87,8 +87,10 @@
   const hourBefore = (times, fallback = 17) => { if (!times.length) return fallback; const h = +times[0].slice(0, 2); return Math.min(21, Math.max(6, h - 2)); };
   /* 영문 제목·영문 예매처(기관 영문 게시판) */
   const enOf = s => (DATA.titles_en && DATA.titles_en.byId[s.id]) || null;
-  const showTitle = s => { const e = enOf(s); return lang === "en" && e && e.en !== s.title ? e.en : s.title; };
-  const subTitle = s => { const e = enOf(s); return lang === "en" && e && e.en !== s.title ? s.title : ""; };
+  const bare = t => (t || "").replace(/[^A-Za-z0-9가-힣]/g, "").toLowerCase();
+  const enUsable = (e, s) => e && /[A-Za-z]{3,}/.test(e.en) && bare(e.en) !== bare(s.title);  // 영문 글 제목이 실제 영어이고 원제와 다를 때만
+  const showTitle = s => { const e = enOf(s); return lang === "en" && enUsable(e, s) ? e.en : s.title; };
+  const subTitle = s => { const e = enOf(s); return lang === "en" && enUsable(e, s) ? s.title : ""; };
 
   /* ---------- 공통 ---------- */
   function applyI18n() {
