@@ -21,6 +21,11 @@
       dayKind: { wd: "평일", sat: "토요일", sun: "일요일·공휴일" },
       parkingH: "가까운 주차장", lot: "주차장", spaces: "대수", walk: "걸어서", gates: "진입 출입문", hours: "운영 시간", feeH: "요금", noLot: "이 공연장은 주차장 안내가 없습니다. P1(562대)을 이용하십시오.",
       transitH: "대중교통", exit: "출구", toward: "→", tipsH: "공연일 안내",
+      timeUnknown: "시각 미확인", timeCheck: "시각 표기 점검", booking: "예매", startAt: (v, t) => `${v} 공연 시작 ${t}. 2024년 7월 기록에서는 시작 2~3시간 전부터 입차가 늘었습니다.`,
+      sessionsH: "회차 시각 점검(기관 누리집 상세 글)", sessionsSub: "공공데이터에는 회차별 시작 시각이 없어 기관 누리집 공연 상세 글의 \"시간\" 칸을 읽어 날짜별 시각으로 표준화하고 표기 오류를 점검합니다. 2026년 이후 공연 전부와 다가오는 공연을 매일 다시 읽습니다.",
+      sessRead: "읽은 상세 글", sessGot: "시각 확보", sessBlank: "빈칸·추후 공지", sessErr: "표기 오류", sessShow: "공연", sessRaw: "원문", sessProblem: "문제", sessFix: "정정안",
+      sessIssue: { date_outside: "날짜가 공연 기간 밖(월 오기 추정)", weekday_mismatch: "요일이 날짜와 다름", weekday_blank: "요일 빈칸", time_format: "시각 표기 불완전('시' 누락)", time_leftover: "해석 못 한 시각 표기", time_unparsed: "시각 해석 불가", date_invalid: "없는 날짜", period_mismatch: "공공데이터와 누리집 기간 불일치", time_blank: "시각 빈칸", time_tbd: "추후 공지", partial_days: "기간 중 일부 날만 회차", note: "비고", page_error: "누리집 상세 글 열리지 않음(서버 오류)" },
+      sessNote: "오류로 잡힌 글은 화면에 '시각 표기 점검' 꼬리표를 붙이고, 정정안이 있으면 정정안 날짜로 회차를 잡습니다. 원문은 기관 누리집에서 확인하십시오.",
       statTotal: "전체 공연 자료", statClean: "문제 없는 자료", statRecent: "2024년 이후", statVenueRaw: "공연장 표기 종류",
       issuesH: "자동 점검 결과", variantsH: "공연장 표기 통일(2024년 이후)", raw: "원문 표기", canonical: "표준명", count: "건",
       issue: { venue_variant: "공연장 표기가 표준명과 다름", venue_blank: "공연장 빈칸·자리표", venue_unmatched: "공연장 판별 불가", non_show: "공연이 아닌 항목(대관 준비·예약 자리표)", duration_blank: "공연 시간 빈칸·자리표", duration_unparsed: "공연 시간 해석 불가", duplicate: "같은 제목·기간 중복 등록", period_unparsed: "기간 해석 불가" },
@@ -41,6 +46,11 @@
       dayKind: { wd: "Weekday", sat: "Saturday", sun: "Sunday / holiday" },
       parkingH: "Nearest parking", lot: "Lot", spaces: "Spaces", walk: "Walk", gates: "Gates", hours: "Hours", feeH: "Fee", noLot: "No lot listed for this venue. Use P1 (562 spaces).",
       transitH: "Public transport", exit: "Exit", toward: "→", tipsH: "Show-day tips",
+      timeUnknown: "Time not listed", timeCheck: "Time text check", booking: "Tickets", startAt: (v, t) => `${v} show starts at ${t}. In July 2024 records, inbound traffic rose 2 to 3 hours before showtime.`,
+      sessionsH: "Showtime check (official detail pages)", sessionsSub: "Open data has no per-day showtimes, so the service reads the \"time\" field of each official show page, normalises it into dated showtimes and flags text errors. All shows since 2026 plus every upcoming show are re-read daily.",
+      sessRead: "Pages read", sessGot: "Showtimes found", sessBlank: "Blank / TBA", sessErr: "Text errors", sessShow: "Show", sessRaw: "As written", sessProblem: "Problem", sessFix: "Suggested fix",
+      sessIssue: { date_outside: "Date outside show period (wrong month?)", weekday_mismatch: "Weekday does not match date", weekday_blank: "Weekday blank", time_format: "Incomplete time text", time_leftover: "Unparsed time text", time_unparsed: "Time not parseable", date_invalid: "Invalid date", period_mismatch: "Period differs from open data", time_blank: "Time blank", time_tbd: "To be announced", partial_days: "Showtimes on only some days", note: "Note", page_error: "Official page fails to load (server error)" },
+      sessNote: "Flagged pages get a 'Time text check' tag on the schedule; when a fix is suggested, the showtime is placed on the corrected date. Check the official page for the original text.",
       statTotal: "Show records", statClean: "Clean records", statRecent: "Since 2024", statVenueRaw: "Venue spellings",
       issuesH: "Automatic checks", variantsH: "Venue name unification (since 2024)", raw: "As written", canonical: "Standard", count: "n",
       issue: { venue_variant: "Venue differs from standard name", venue_blank: "Venue blank / placeholder", venue_unmatched: "Venue not recognised", non_show: "Not a show (booking placeholders)", duration_blank: "Running time blank", duration_unparsed: "Running time unreadable", duplicate: "Duplicate title and period", period_unparsed: "Period unreadable" },
@@ -56,11 +66,19 @@
   const state = { venue: "all", fc: { date: today, hour: 17, venue: "KSPO DOME", rain: 0 } };
 
   async function load() {
-    const names = ["shows", "model", "venues", "quality", "holidays"];
+    const names = ["shows", "model", "venues", "quality", "holidays", "details"];
     const res = await Promise.all(names.map(n => fetch(`data/${n}.json`).then(r => r.json())));
     names.forEach((n, i) => DATA[n] = res[i]);
     DATA.holidaySet = new Set(DATA.holidays.holidays.map(String));
   }
+  /* 회차 시각(기관 누리집 상세 글) */
+  const ERR_KINDS = ["date_outside", "weekday_mismatch", "weekday_blank", "time_format", "time_leftover", "time_unparsed", "date_invalid", "period_mismatch"];
+  const LIST_KINDS = ERR_KINDS.concat(["page_error"]);  // 점검판 표에 싣는 종류(누리집 글 자체 오류 포함)
+  const seqOf = s => ((s.url || "").match(/evtSeq=(\d+)/) || [])[1];
+  const detailOf = s => (DATA.details && DATA.details.bySeq[seqOf(s)]) || null;
+  const timesOn = (s, k) => { const d = detailOf(s); return d ? d.sessions.filter(x => x.date === k).map(x => x.time) : []; };
+  const hasErr = d => d && d.checks.some(c => ERR_KINDS.includes(c.kind));
+  const hourBefore = (times, fallback = 17) => { if (!times.length) return fallback; const h = +times[0].slice(0, 2); return Math.min(21, Math.max(6, h - 2)); };
 
   /* ---------- 공통 ---------- */
   function applyI18n() {
@@ -95,7 +113,13 @@
     renderChips();
     const list = upcoming().filter(s => state.venue === "all" || s.venue === state.venue);
     const byDay = {};
+    const limitIso = iso(new Date(Date.now() + 60 * 864e5));
     list.forEach(s => {
+      const det = detailOf(s);
+      if (det && det.sessionDays.length) {  // 회차가 있는 날만 (준비·철거일 제외)
+        det.sessionDays.filter(k => k >= today && k <= limitIso).forEach(k => (byDay[k] = byDay[k] || []).push(s));
+        return;
+      }
       let d = new Date(Math.max(new Date(s.start + "T00:00:00"), new Date(today + "T00:00:00")));
       const end = new Date(s.end + "T00:00:00");
       const limit = new Date(Date.now() + 60 * 864e5);
@@ -104,24 +128,27 @@
     const keys = Object.keys(byDay).sort();
     if (!keys.length) { $("#scheduleList").innerHTML = `<div class="empty">${T("noUpcoming")}</div>`; $("#scheduleNote").textContent = ""; return; }
     $("#scheduleList").innerHTML = keys.map(k => `<div class="day ${k === today ? "today" : ""}">${fmtDate(k)}${k === today ? ` · ${T("today")}` : ""}</div>` +
-      byDay[k].sort((a, b) => (b.big - a.big) || a.title.localeCompare(b.title)).map(s => `
+      byDay[k].sort((a, b) => (b.big - a.big) || a.title.localeCompare(b.title)).map(s => { const det = detailOf(s); const times = timesOn(s, k); return `
       <article class="show">
         <div>
-          <p class="title">${esc(s.title)}</p>
+          <p class="title">${times.map(t => `<span class="time">${t}</span>`).join(" ")}${times.length ? " " : ""}${esc(s.title)}</p>
           <div class="meta">
             <span>${venueName(s.venue)}</span>
             <span>${fmtDate(s.start)}${s.start !== s.end ? ` ~ ${fmtDate(s.end)} · ${s.days}${T("days")}` : ""}</span>
             ${s.durationMin ? `<span>${s.durationMin}${T("min")}</span>` : ""}
             ${s.big ? `<span class="tag big">${T("bigShow")}</span>` : ""}
+            ${!times.length ? `<span class="tag" title="${esc(det ? det.timeRaw : "")}">${T("timeUnknown")}</span>` : ""}
+            ${hasErr(det) ? `<span class="tag warn" title="${esc(det.checks.filter(c => ERR_KINDS.includes(c.kind)).map(c => `${T("sessIssue")[c.kind] || c.kind}: ${c.text}${c.fix ? ` → ${c.fix}` : ""}`).join(" / "))}">${T("timeCheck")}</span>` : ""}
             ${s.issues.includes("venue_variant") ? `<span class="tag warn" title="${esc(s.venueRaw)}">${T("venueFixed")}: ${esc(s.venueRaw)}</span>` : ""}
           </div>
         </div>
         <div class="acts">
-          <button class="btn primary" data-fc="${k}|${s.venue}">${T("forecastBtn")}</button>
+          <button class="btn primary" data-fc="${k}|${s.venue}|${hourBefore(times)}">${T("forecastBtn")}</button>
+          ${det && det.booking ? `<a class="btn" href="${esc(det.booking)}" target="_blank" rel="noopener">${T("booking")}</a>` : ""}
           ${s.url ? `<a class="btn" href="${esc(s.url)}" target="_blank" rel="noopener">${T("official")}</a>` : ""}
         </div>
-      </article>`).join("")).join("");
-    $$("#scheduleList [data-fc]").forEach(b => b.onclick = () => { const [d, v] = b.dataset.fc.split("|"); state.fc.date = d; state.fc.venue = v; state.fc.hour = 17; syncForecastForm(); location.hash = "#forecast"; showTab("forecast"); });
+      </article>`; }).join("")).join("");
+    $$("#scheduleList [data-fc]").forEach(b => b.onclick = () => { const [d, v, h] = b.dataset.fc.split("|"); state.fc.date = d; state.fc.venue = v; state.fc.hour = +h || 17; syncForecastForm(); location.hash = "#forecast"; showTab("forecast"); });
     const n = new Set(list.map(s => s.id)).size;
     $("#scheduleNote").textContent = lang === "ko" ? `${fmtDate(today)}부터 60일 안의 공연 ${n}건. 공연 자료 갱신 ${DATA.shows.updated}` : `${n} shows within 60 days from ${fmtDate(today)}. Data updated ${DATA.shows.updated}`;
   }
@@ -163,7 +190,8 @@
       <div>
         <p class="big">${fmtDate(date)} ${pad(hour)}:00 · ${T("dayKind")[dayKind(date)]}${rain ? ` · ${T("forecast.rainy")}` : ""}</p>
         <p class="why">${T("expected")(n)} · ${T("basis")(cnt, basisTxt)}</p>
-        <p class="why">${big ? T("bigOn")(bigs.map(s => `${venueName(s.venue)}(${esc(s.title)})`).join(", ")) : T("bigOff")}</p>
+        <p class="why">${big ? T("bigOn")(bigs.map(s => { const t = timesOn(s, date); return `${venueName(s.venue)}(${esc(s.title)}${t.length ? `, ${t.join("·")}` : ""})`; }).join(", ")) : T("bigOff")}</p>
+        ${(() => { const t = [...new Set(DATA.shows.shows.filter(s => isShow(s) && s.venue === venue && s.start <= date && s.end >= date).flatMap(s => timesOn(s, date)))].sort(); return t.length ? `<p class="why">${T("startAt")(venueName(venue), t.join(" · "))}</p>` : ""; })()}
       </div>`;
     $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const r = lookup(date, h, big, rain); return `<div class="l${r[1]} ${h === hour ? "sel" : ""}" title="${pad(h)}:00 ${r[0]}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
     $$("#fcStrip div").forEach((el, h) => el.onclick = () => { state.fc.hour = h; syncForecastForm(); renderForecast(); });
@@ -190,6 +218,21 @@
     $("#qVariants").innerHTML = `<h3>${T("variantsH")}</h3><table><tr><th>${T("raw")}</th><th>${T("canonical")}</th><th class="num">${T("count")}</th></tr>` +
       q.recent.venueVariants.map(v => `<tr><td>${esc(v.raw)}</td><td>${venueName(v.canonical)}</td><td class="num">${v.n}</td></tr>`).join("") + `</table>`;
     $("#qNotes").innerHTML = `<ul class="plain">${T("qNotes").map(s => `<li>${s}</li>`).join("")}</ul>`;
+    renderSessions();
+  }
+  function renderSessions() {
+    const by = Object.values((DATA.details || {}).bySeq || {});
+    if (!by.length) { $("#qSessions").innerHTML = ""; return; }
+    const withS = by.filter(d => d.sessions.length).length;
+    const blank = by.filter(d => d.checks.some(c => c.kind === "time_blank" || c.kind === "time_tbd")).length;
+    const errs = by.flatMap(d => d.checks.filter(c => LIST_KINDS.includes(c.kind)).map(c => ({ d, c }))).sort((a, b) => b.d.period.localeCompare(a.d.period));
+    const nErr = new Set(errs.map(e => e.d.seq)).size;
+    const stat = (n, l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
+    $("#qSessions").innerHTML = `<h3>${T("sessionsH")}</h3><p class="muted small">${T("sessionsSub")}</p>
+      <div class="stats">${stat(by.length, T("sessRead"))}${stat(`${withS} <span class="small muted">(${Math.round(withS / by.length * 100)}%)</span>`, T("sessGot"))}${stat(blank, T("sessBlank"))}${stat(nErr, T("sessErr"))}</div>
+      <table><tr><th>${T("sessShow")}</th><th>${T("sessRaw")}</th><th>${T("sessProblem")}</th><th>${T("sessFix")}</th></tr>` +
+      errs.map(({ d, c }) => `<tr><td>${esc(d.title.slice(0, 28))}${d.title.length > 28 ? "…" : ""}<div class="small muted">${esc(d.period)}</div></td><td>${esc(c.text)}</td><td>${T("sessIssue")[c.kind] || c.kind}</td><td>${esc(c.fix || "")}</td></tr>`).join("") +
+      `</table><p class="muted small">${T("sessNote")}</p>`;
   }
 
   function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
