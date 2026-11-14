@@ -31,12 +31,13 @@
       all: "전체", today: "오늘", days: "일간", min: "분", official: "기관 안내", forecastBtn: "주차 예보", bigShow: "대형 공연", venueFixed: "표기 통일", noUpcoming: "다가오는 공연이 없습니다.",
       upcomingNote: (n, from, to) => `${from}부터 ${to}까지 공연 ${n}건. 자료 갱신 ${""}`,
       expected: n => `예상 입차 ${n}대/시간`, basis: (n, b) => `표본 ${n}시간 · ${b}`, basisD: "같은 조건 평균", basisR: "비 구분 없이 평균", basisS: "공연 구분 없이 평균",
-      basisV1: (b, mo) => `기준 ${b.base}대(2024년 7월 같은 요일·시각 평균)${b.showF !== 1 ? ` × 공연 ${b.showF}(시작 ${b.off < 0 ? `${-b.off}시간 전` : b.off === 0 ? "시각" : `${b.off}시간 뒤`})` : ""}${b.rainF !== 1 ? ` × 비 ${b.rainF}` : ""}${b.monthF !== 1 ? ` × ${mo}월 보정 ${b.monthF}` : ""}`,
+      basisV1: (b, mo) => `기준 ${b.base}대(2024년 7월 자료로 추정한 요일·시각 기준값, 공연·비 효과 제외)${b.showF !== 1 ? ` × 공연 ${b.showF}(시작 ${b.off < 0 ? `${-b.off}시간 전` : b.off === 0 ? "시각" : `${b.off}시간 뒤`})` : ""}${b.rainF !== 1 ? ` × 비 ${b.rainF}` : ""}${b.monthF !== 1 ? ` × ${mo}월 보정 ${b.monthF}` : ""}`,
       modelH: "예보 모델 근거", modelNotes: (m, v) => [
         `계산식: ${m.formula}`,
         `기준값 72칸(요일구분 3×시각 24)·공연 효과 ${m.showEffect.factor.length}구간·비 효과는 2024년 7월 입출차 744시간으로 추정, 월 보정은 월별 주차현황(2023~2025년)의 7월 대비 비율입니다.`,
         `공연 효과(시작 시각까지의 거리): ${m.showEffect.bins.map((b, i) => `${b}시간 ×${m.showEffect.factor[i]}`).join(", ")}. 비 효과 ×${m.rainEffect}.`,
-        v.v1 ? `검증(${v.method}): 평균 절대 오차 ${v.v1.mae}대/시간, 4단계 수준 일치 ${Math.round(v.v1.levelAgree * 100)}%. 칸 평균 방식(v0)은 ${v.cellAverage_v0.mae}대·${Math.round(v.cellAverage_v0.levelAgree * 100)}%로 정확도는 비슷하고, v1은 회차 시각을 입력으로 쓰고 근거를 풀어 보여 줍니다.` : "",
+        v.v1 ? `검증(${v.method}): 평균 절대 오차 ${v.v1.mae}대/시간, 4단계 수준 일치 ${Math.round(v.v1.levelAgree * 100)}%. 칸 평균 방식(v0) ${v.cellAverage_v0.mae}대·${Math.round(v.cellAverage_v0.levelAgree * 100)}%, 요일·시각 평균만 쓴 방식 ${v.weekdayHourOnly.mae}대·${Math.round(v.weekdayHourOnly.levelAgree * 100)}%와 정확도가 비슷합니다. 한 달치 표본에서는 공연·비 효과가 정확도를 더 올리지 못하며, v1의 장점은 회차 시각을 입력으로 쓰고 근거를 풀어 보여 주는 데 있습니다.` : "",
+        `공연 효과는 시작 6시간 전부터만 적용하고, 월 보정은 검증하지 않은 가정값이며 수준 경계는 2024년 7월 분포에 고정되어 있습니다.`,
         ...(m.limits || []),
       ].filter(Boolean),
       bigOn: v => `이날 ${v} 공연이 있어 공연 수요를 더했습니다.`, bigOff: "이날 대형 공연장(KSPO DOME·핸드볼경기장) 공연이 없습니다.",
@@ -85,12 +86,13 @@
       all: "All", today: "Today", days: "days", min: "min", official: "Official page", forecastBtn: "Parking", bigShow: "Major show", venueFixed: "Name unified", noUpcoming: "No upcoming shows.",
       upcomingNote: (n, from, to) => `${n} shows from ${from} to ${to}.`,
       expected: n => `About ${n} cars entering per hour`, basis: (n, b) => `${n} sample hours · ${b}`, basisD: "same conditions", basisR: "rain ignored", basisS: "shows ignored",
-      basisV1: (b, mo) => `Base ${b.base} cars (July 2024 average for this weekday type and hour)${b.showF !== 1 ? ` × show ${b.showF} (${b.off < 0 ? `${-b.off}h before start` : b.off === 0 ? "at start" : `${b.off}h after start`})` : ""}${b.rainF !== 1 ? ` × rain ${b.rainF}` : ""}${b.monthF !== 1 ? ` × month ${b.monthF}` : ""}`,
+      basisV1: (b, mo) => `Base ${b.base} cars (model baseline for this weekday type and hour, July 2024, show and rain effects removed)${b.showF !== 1 ? ` × show ${b.showF} (${b.off < 0 ? `${-b.off}h before start` : b.off === 0 ? "at start" : `${b.off}h after start`})` : ""}${b.rainF !== 1 ? ` × rain ${b.rainF}` : ""}${b.monthF !== 1 ? ` × month ${b.monthF}` : ""}`,
       modelH: "How the forecast is made", modelNotes: (m, v) => [
         `Formula: hourly inbound = base[weekday type][hour] × show effect[distance to showtime] × rain effect × month factor.`,
         `The 72 base values (3 weekday types × 24 hours), ${m.showEffect.factor.length} show-effect bins and the rain effect are estimated from 744 hours of July 2024 gate records; month factors are month-to-July ratios from monthly parking totals (2023 to 2025).`,
         `Show effect by hours to showtime: ${m.showEffect.bins.map((b, i) => `${b}h ×${m.showEffect.factor[i]}`).join(", ")}. Rain ×${m.rainEffect}.`,
-        v.v1 ? `Validation (leave-one-day-out, 31 refits): mean absolute error ${v.v1.mae} cars/h, 4-level agreement ${Math.round(v.v1.levelAgree * 100)}%. The simpler cell-average model (v0) scores ${v.cellAverage_v0.mae} and ${Math.round(v.cellAverage_v0.levelAgree * 100)}%; accuracy is similar, but v1 takes the showtime as an input and shows its reasoning.` : "",
+        v.v1 ? `Validation (leave-one-day-out, 31 refits): mean absolute error ${v.v1.mae} cars/h, 4-level agreement ${Math.round(v.v1.levelAgree * 100)}%. The cell-average model (v0) scores ${v.cellAverage_v0.mae} / ${Math.round(v.cellAverage_v0.levelAgree * 100)}% and a weekday-hour-only average ${v.weekdayHourOnly.mae} / ${Math.round(v.weekdayHourOnly.levelAgree * 100)}%; with one month of data the show and rain effects do not add accuracy, and v1's merit is taking the showtime as an input and showing its reasoning.` : "",
+        "The show effect applies only from 6 hours before showtime; the month factor is an unvalidated assumption and the level thresholds are fixed to the July 2024 distribution.",
         "The sample is one month (8 major-show days), so seasonal and year-end demand enters only through the month factor.",
         "All four Saturdays of July 2024 had major shows, so the Saturday baseline without a show is a model assumption.",
       ].filter(Boolean),
@@ -269,9 +271,7 @@
       if (starts.length) {
         off = starts.map(s => hour - s).sort((a, b) => Math.abs(a) - Math.abs(b))[0];
         const i = m.showEffect.lo.findIndex((lo, j) => off >= lo && off <= m.showEffect.hi[j]);
-        showF = m.showEffect.factor[i < 0 ? m.showEffect.factor.length - 1 : i];
-        bin = m.showEffect.bins[i < 0 ? m.showEffect.factor.length - 1 : i];
-        v *= showF;
+        if (i >= 0) { showF = m.showEffect.factor[i]; bin = m.showEffect.bins[i]; v *= showF; }  // 시작 6시간 넘게 이른 시각은 효과 없음
       }
     }
     const rainF = rain ? m.rainEffect : 1;

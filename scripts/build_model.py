@@ -20,16 +20,17 @@ import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, "data", "source")
 OUT = os.path.join(ROOT, "data", "model.json")
-BINS = [("<=-5", -99, -5), ("-4~-3", -4, -3), ("-2~-1", -2, -1), ("0", 0, 0), (">=1", 1, 99)]   # 시작 시각까지의 거리(시간) 구간
+BINS = [("-6~-5", -6, -5), ("-4~-3", -4, -3), ("-2~-1", -2, -1), ("0", 0, 0), (">=1", 1, 99)]   # 시작 시각까지의 거리(시간) 구간. 6시간 넘게 이른 시각은 공연 효과 없음
 KINDS = ["wd", "sat", "sun"]
 DEFAULT_START = {"wd": 19, "sat": 18, "sun": 17}   # 회차 시각을 모를 때(2024년 7월 대형 공연의 흔한 시작 시각)
 
 
 def bin_of(off):
+    """구간 번호, 범위 밖(시작 6시간 넘게 전)은 None = 효과 없음"""
     for i, (_, lo, hi) in enumerate(BINS):
         if lo <= off <= hi:
             return i
-    return len(BINS) - 1
+    return None
 
 
 def load_rows():
@@ -68,8 +69,9 @@ def design(rows):
     X = np.zeros((n, p))
     for i, r in enumerate(rows):
         X[i, KINDS.index(r["kind"]) * 24 + r["h"]] = 1
-        if r["big"]:
-            X[i, 72 + bin_of(r["off"])] = 1
+        b = bin_of(r["off"]) if r["big"] else None
+        if b is not None:
+            X[i, 72 + b] = 1
         if r["rain"]:
             X[i, 72 + len(BINS)] = 1
     y = np.log1p(np.array([r["y"] for r in rows], dtype=float))
@@ -84,8 +86,9 @@ def fit(rows):
 
 def predict(beta, r):
     v = beta[KINDS.index(r["kind"]) * 24 + r["h"]]
-    if r["big"]:
-        v += beta[72 + bin_of(r["off"])]
+    b = bin_of(r["off"]) if r["big"] else None
+    if b is not None:
+        v += beta[72 + b]
     if r["rain"]:
         v += beta[72 + len(BINS)]
     return max(0.0, math.expm1(v))
@@ -112,15 +115,17 @@ def main():
     beta = fit(rows)
     # 하루씩 빼고 검증
     days = sorted({r["date"] for r in rows})
-    err1 = err0 = agree1 = agree0 = 0
+    err1 = err0 = errs = agree1 = agree0 = agrees = 0
     for d in days:
         train = [r for r in rows if r["date"] != d]
         test = [r for r in rows if r["date"] == d]
         b = fit(train)
         for r in test:
             p1, p0 = predict(b, r), cell_predict(train, r)
-            err1 += abs(p1 - r["y"]); err0 += abs(p0 - r["y"])
-            agree1 += level(p1, th) == level(r["y"], th); agree0 += level(p0, th) == level(r["y"], th)
+            v = [x["y"] for x in train if x["kind"] == r["kind"] and x["h"] == r["h"]]
+            ps = sum(v) / len(v) if v else 0.0
+            err1 += abs(p1 - r["y"]); err0 += abs(p0 - r["y"]); errs += abs(ps - r["y"])
+            agree1 += level(p1, th) == level(r["y"], th); agree0 += level(p0, th) == level(r["y"], th); agrees += level(ps, th) == level(r["y"], th)
     n = len(rows)
     # 월 보정(월별 주차현황: 연도별 월/7월 비율의 평균)
     mp = collections.defaultdict(dict)
@@ -143,19 +148,20 @@ def main():
         "levels": ["여유", "보통", "혼잡", "매우 혼잡"], "levelsEn": ["Light", "Moderate", "Busy", "Very busy"],
         "kinds": KINDS, "base": base, "baseN": base_n,
         "showEffect": {"bins": [b[0] for b in BINS], "lo": [b[1] for b in BINS], "hi": [b[2] for b in BINS], "factor": show_eff,
-                       "note": "대형 공연(KSPO DOME·핸드볼경기장) 시작 시각까지의 거리(시간) 구간별 배수. 2024년 7월 대형 공연일 8일에서 추정"},
+                       "note": "대형 공연(KSPO DOME·핸드볼경기장) 시작 시각까지의 거리(시간) 구간별 배수. 시작 6시간 넘게 이른 시각에는 적용하지 않음. 2024년 7월 대형 공연일 8일에서 추정"},
         "rainEffect": rain_eff, "defaultStart": DEFAULT_START,
         "monthFactor": month_factor,
         "validation": {"method": "하루씩 빼고 31회 재추정(leave-one-day-out)", "hours": n,
                        "v1": {"mae": round(err1 / n, 1), "levelAgree": round(agree1 / n, 3)},
-                       "cellAverage_v0": {"mae": round(err0 / n, 1), "levelAgree": round(agree0 / n, 3)}},
+                       "cellAverage_v0": {"mae": round(err0 / n, 1), "levelAgree": round(agree0 / n, 3)},
+                       "weekdayHourOnly": {"mae": round(errs / n, 1), "levelAgree": round(agrees / n, 3)}},
         "showDays": sorted({r["date"] for r in rows if r["big"]}),
         "limits": ["표본이 2024년 7월 한 달(대형 공연일 8일)이라 계절·연말 수요는 월 보정으로만 반영", "2024년 7월 토요일 4일이 모두 대형 공연일이어서 공연 없는 토요일 기준은 모형 가정으로 추정"],
     }
     json.dump(model, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print("thresholds", th, "| showEffect", dict(zip(model["showEffect"]["bins"], show_eff)), "| rain", rain_eff)
     print("monthFactor", month_factor)
-    print("CV v1 mae %.1f agree %.3f | cell v0 mae %.1f agree %.3f" % (err1 / n, agree1 / n, err0 / n, agree0 / n))
+    print("CV v1 mae %.1f agree %.3f | cell v0 mae %.1f agree %.3f | weekday-hour only mae %.1f agree %.3f" % (err1 / n, agree1 / n, err0 / n, agree0 / n, errs / n, agrees / n))
     print("base wd 8h", base["wd"][8], "sat 15h", base["sat"][15], "sun 15h", base["sun"][15])
 
 

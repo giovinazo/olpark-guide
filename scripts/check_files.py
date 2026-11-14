@@ -38,7 +38,7 @@ def monthly():
 
 
 def main():
-    out = {"updated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "congestion": congestion(), "monthly": monthly()}
+    out = {"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "congestion": congestion(), "monthly": monthly()}
     json.dump(out, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print(json.dumps({k: (v if k == "updated" else {kk: vv for kk, vv in v.items() if kk in ("rows", "timeMinSecEqualsMonthDay", "years", "ratioGateToMonthly")}) for k, v in out.items()}, ensure_ascii=False))
 

@@ -122,7 +122,7 @@ def quality(shows):
     cr = collections.Counter(i for s in recent for i in s["issues"])
     variants = collections.Counter((s["venueRaw"], s["venue"]) for s in recent if "venue_variant" in s["issues"])
     return {
-        "generated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "generated": dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"),
         "total": len(shows), "clean": sum(1 for s in shows if not s["issues"]),
         "counts": dict(c),
         "recent": {"from": "2024-01-01", "total": len(recent), "clean": sum(1 for s in recent if not s["issues"]), "counts": dict(cr),
@@ -142,7 +142,7 @@ def main():
         items = fetch_all(key)
     shows = build(items)
     os.makedirs(DATA, exist_ok=True)
-    json.dump({"updated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "source": "문화 공공데이터광장 통합 공연정보(API_CCA_144) 중 한국체육산업개발(주)", "shows": shows},
+    json.dump({"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "source": "문화 공공데이터광장 통합 공연정보(API_CCA_144) 중 한국체육산업개발(주)", "shows": shows},
               open(os.path.join(DATA, "shows.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     json.dump(quality(shows), open(os.path.join(DATA, "quality.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print("shows", len(shows), "| clean", sum(1 for s in shows if not s["issues"]), "| upcoming", sum(1 for s in shows if (s["end"] or "") >= dt.date.today().isoformat()))

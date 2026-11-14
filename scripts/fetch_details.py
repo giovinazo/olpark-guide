@@ -316,7 +316,7 @@ def main():
         a_s = dt.date.fromisoformat(s["start"]) if s["start"] else None
         a_e = dt.date.fromisoformat(s["end"]) if s["end"] else a_s
         by[seq] = analyse(rec, a_s, a_e)
-    json.dump({"updated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "source": "한국체육산업개발(주) 올림픽공원 누리집 공연 일정안내 상세 글",
+    json.dump({"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "source": "한국체육산업개발(주) 올림픽공원 누리집 공연 일정안내 상세 글",
                "bySeq": by}, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
     tot = len(by)
     with_s = sum(1 for r in by.values() if r["sessions"])

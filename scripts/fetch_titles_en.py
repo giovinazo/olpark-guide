@@ -158,7 +158,7 @@ def main():
     today = dt.date.today().isoformat()
     up = [s for s in shows if (s.get("end") or "") >= today and "non_show" not in s["issues"]]
     up_linked = sum(1 for s in up if s["id"] in by_id)
-    json.dump({"updated": dt.datetime.now().strftime("%Y-%m-%d %H:%M"), "source": src, "items": len(items),
+    json.dump({"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "source": src, "items": len(items),
                "linked": len(by_id), "upcoming": {"total": len(up), "linked": up_linked},
                "byId": by_id, "unmatched": unmatched[:200]},
               open(OUT, "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
