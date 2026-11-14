@@ -1,4 +1,4 @@
-"""주차 혼잡 예보 모델 v1 : data/source/*.csv → data/model.json
+"""주차 혼잡 예보 모델 v1.2 : data/source/*.csv → data/model.json
 
 자료
 - link_table_202407.csv : 올림픽공원 입출차 정보(공공데이터포털 15138735, 2024년 7월 215,528건)를 시간별로 모은 744행
@@ -141,10 +141,10 @@ def main():
     show_eff = [round(math.exp(beta[72 + i]), 3) for i in range(len(BINS))]
     rain_eff = round(math.exp(beta[72 + len(BINS)]), 3)
     model = {
-        "version": "v1", "period": "2024-07",
+        "version": "v1.2", "period": "2024-07", "thresholdsScaleWithMonth": True,
         "source": "올림픽공원 입출차 정보(2024년 7월, 215,528건) 시간별 744행 + 기상청 ASOS 서울 108 + 한국천문연구원 공휴일 + 누리집 공연 일정 9건, 월 보정은 올림픽공원 월별 주차현황(2023~2025년)",
         "formula": "입차(시간당) = 기준[요일구분][시] × 공연효과[시작까지 거리]^(대형공연) × 비효과^(비) × 월보정[월]",
-        "thresholds": {"여유<": th[0], "보통<": th[1], "혼잡<": th[2]},
+        "thresholds": {"여유<": th[0], "보통<": th[1], "혼잡<": th[2]},   # 7월 기준, 화면은 월 보정을 곱해 씀(수준=그 달 안 상대 혼잡)
         "levels": ["여유", "보통", "혼잡", "매우 혼잡"], "levelsEn": ["Light", "Moderate", "Busy", "Very busy"],
         "kinds": KINDS, "base": base, "baseN": base_n,
         "showEffect": {"bins": [b[0] for b in BINS], "lo": [b[1] for b in BINS], "hi": [b[2] for b in BINS], "factor": show_eff,

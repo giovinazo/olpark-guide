@@ -1,22 +1,24 @@
-/* 올림픽공원 공연·주차 길잡이 v0 */
+/* 올림픽공원 공연·주차 길잡이 (모델 v1.2) */
 (() => {
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const pad = n => String(n).padStart(2, "0");
   const iso = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-  const today = iso(new Date());
+  const kstNow = new Date(Date.now() + (new Date().getTimezoneOffset() + 540) * 60000);  // 보는 사람 시간대와 관계없이 한국 날짜
+  const today = iso(kstNow);
   try { const th = new URLSearchParams(location.search).get("theme"); if (th === "light" || th === "dark") document.documentElement.dataset.theme = th; } catch (e) {}  // ?theme=light 로 밝은 화면 고정(시연·캡처용)
 
   const I18N = {
     ko: {
       brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
       todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
-      levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "공연장 옆 주차장이 찰 가능성이 큽니다. 30분 일찍 오거나 P1(562대)을 바로 이용하십시오.", "주차장 진입 도로까지 막히는 시간대입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
+      levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "공연장 옆 주차장이 찰 가능성이 큽니다. 30분 일찍 오거나 P1(562대)을 바로 이용하십시오.", "그 달 평소보다 들어오는 차가 가장 많은 시간대(상위 10%)입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
       stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
-      sourcesH: "활용 데이터", sources: [
+      sourcesH: "활용 데이터", license: "기상청 자료는 공공누리 제1유형(출처표시), 그 밖의 공공데이터는 공공데이터포털·문화 공공데이터광장 이용조건을 따릅니다. 소스 코드는 MIT 라이선스입니다.", liveLink: "실시간 주차대수(주말 운영): 기관 주차장 예상 이용률", sources: [
         ["한국체육산업개발(주) 올림픽공원 입출차 정보(2024년 7월)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["한국체육산업개발(주) 올림픽공원 영문 공연정보", "https://www.data.go.kr/data/15149169/fileData.do"],
-        ["한국체육산업개발(주) 올림픽공원 주차장 혼잡도 정보·월별 주차현황", "https://www.data.go.kr/data/15164156/fileData.do"],
+        ["한국체육산업개발(주) 올림픽공원 월별 주차현황(월 보정)", "https://www.data.go.kr/data/15131671/fileData.do"],
+        ["한국체육산업개발(주) 올림픽공원 주차장 혼잡도 정보(파일 점검)", "https://www.data.go.kr/data/15164156/fileData.do"],
         ["한국문화정보원 문화 공공데이터광장 통합 공연정보(API_CCA_144) 중 한국체육산업개발(주) 분", "https://www.culture.go.kr/data/openapi/openapiList.do"],
         ["기상청 단기예보 조회서비스(올림픽공원 격자 62·126)", "https://www.data.go.kr/data/15084084/openapi.do"],
         ["기상청 지상(종관, ASOS) 시간자료(서울 108, 모델 추정용)", "https://www.data.go.kr/data/15057210/openapi.do"],
@@ -37,7 +39,7 @@
         `기준값 72칸(요일구분 3×시각 24)·공연 효과 ${m.showEffect.factor.length}구간·비 효과는 2024년 7월 입출차 744시간으로 추정, 월 보정은 월별 주차현황(2023~2025년)의 7월 대비 비율입니다.`,
         `공연 효과(시작 시각까지의 거리): ${m.showEffect.bins.map((b, i) => `${b}시간 ×${m.showEffect.factor[i]}`).join(", ")}. 비 효과 ×${m.rainEffect}.`,
         v.v1 ? `검증(${v.method}): 평균 절대 오차 ${v.v1.mae}대/시간, 4단계 수준 일치 ${Math.round(v.v1.levelAgree * 100)}%. 칸 평균 방식(v0) ${v.cellAverage_v0.mae}대·${Math.round(v.cellAverage_v0.levelAgree * 100)}%, 요일·시각 평균만 쓴 방식 ${v.weekdayHourOnly.mae}대·${Math.round(v.weekdayHourOnly.levelAgree * 100)}%와 정확도가 비슷합니다. 한 달치 표본에서는 공연·비 효과가 정확도를 더 올리지 못하며, v1의 장점은 회차 시각을 입력으로 쓰고 근거를 풀어 보여 주는 데 있습니다.` : "",
-        `공연 효과는 시작 6시간 전부터만 적용하고, 월 보정은 검증하지 않은 가정값이며 수준 경계는 2024년 7월 분포에 고정되어 있습니다.`,
+        `공연 효과는 시작 6시간 전부터만 적용하고, 월 보정은 검증하지 않은 가정값입니다. 수준 경계(7월 50·75·90 백분위 ${Object.values(m.thresholds).join('·')}대)에도 같은 월 보정을 곱하므로 수준은 그 달 안에서의 상대 혼잡이고, 예상 대수만 월 보정을 반영합니다.`,
         ...(m.limits || []),
       ].filter(Boolean),
       bigOn: v => `이날 ${v} 공연이 있어 공연 수요를 더했습니다.`, bigOff: "이날 대형 공연장(KSPO DOME·핸드볼경기장) 공연이 없습니다.",
@@ -48,27 +50,27 @@
       wxManual: "직접 고른 값으로 계산 중(날짜를 바꾸면 예보로 돌아감)", wxNone: last => `기상청 단기예보 범위(${last}까지) 밖이라 비 여부는 직접 고르십시오.`,
       pty: { 0: "", 1: "비", 2: "비 또는 눈", 3: "눈", 4: "소나기" },
       timeUnknown: "시각 미확인", timeCheck: "시각 표기 점검", booking: "예매", startAt: (v, t) => `${v} 공연 시작 ${t}. 2024년 7월 기록에서는 시작 2~3시간 전부터 입차가 늘었습니다.`,
-      sessionsH: "회차 시각 점검(기관 누리집 상세 글)", sessionsSub: "공공데이터에는 회차별 시작 시각이 없어 기관 누리집 공연 상세 글의 \"시간\" 칸을 읽어 날짜별 시각으로 표준화하고 표기 오류를 점검합니다. 2026년 이후 공연 전부와 다가오는 공연을 매일 다시 읽습니다.",
+      sessionsH: "회차 시각 점검(기관 누리집 상세 글)", sessionsSub: "공공데이터에는 회차별 시작 시각이 없어 기관 누리집 공연 상세 글의 \"시간\" 칸을 읽어 날짜별 시각으로 표준화하고 표기 오류를 점검합니다. 2026년 이후 공연을 모아 두고, 다가오는 공연(120일 안)은 매일 다시 읽습니다.",
       sessRead: "읽은 상세 글", sessGot: "시각 확보", sessBlank: "빈칸·추후 공지", sessErr: "표기 오류", sessShow: "공연", sessRaw: "원문", sessProblem: "문제", sessFix: "정정안",
       sessIssue: { date_outside: "날짜가 공연 기간 밖(월 오기 추정)", weekday_mismatch: "요일이 날짜와 다름", weekday_blank: "요일 빈칸", time_format: "시각 표기 불완전('시' 누락)", time_leftover: "해석 못 한 시각 표기", time_unparsed: "시각 해석 불가", date_invalid: "없는 날짜", period_mismatch: "공공데이터와 누리집 기간 불일치", time_blank: "시각 빈칸", time_tbd: "추후 공지", partial_days: "기간 중 일부 날만 회차", note: "비고", page_error: "누리집 상세 글 열리지 않음(서버 오류)" },
       sessNote: "오류로 잡힌 글은 화면에 '시각 표기 점검' 꼬리표를 붙이고, 정정안이 있으면 정정안 날짜로 회차를 잡습니다. 원문은 기관 누리집에서 확인하십시오.",
       titlesH: "영문 제목 연결(기관 영문 게시판)", titlesSub: "개방 데이터 '영문 공연정보'(15149169)의 원천인 기관 영문 누리집 Culture Info 게시판을 읽어, 공연정보와 날짜·제목 낱말 겹침으로 짝을 짓습니다. 영어 화면에서는 이 제목과 외국인용 예매처 링크를 씁니다.",
       teItems: "영문 게시판 글", teLinked: "공연정보와 연결", teUpcoming: "다가오는 공연 연결", teKoOnEn: "영문 글인데 한국어 제목(2026년~)", teDate: "날짜", teTitle: "영문 게시판 제목 그대로",
       teNote: n => `제목 낱말이 안 겹치면 시작일이 같은 공연이 하나뿐일 때만 날짜로 연결합니다(${n}건, 점수 0.2). 한국어 제목 그대로인 영문 글은 외국인 관람객이 검색하지 못하는 항목입니다.`,
-      filesH: "개방 파일 점검(주차장 혼잡도 정보·월별 주차현황)", filesSub: "서비스에 직접 쓰지는 않지만 같은 기관 개방 파일 2종을 받아 형식과 규모를 점검한 결과입니다.",
+      filesH: "개방 파일 점검(주차장 혼잡도 정보·월별 주차현황)", filesSub: "같은 기관 개방 파일 2종을 받아 형식과 규모를 점검한 결과입니다. 혼잡도 정보는 점검만 하고, 월별 주차현황은 예보의 월 보정에도 씁니다.",
       fcRows: "혼잡도 등록 행", fcTimeBug: "등록시간 분:초 = 등록일 월:일", fcDays: "등록된 날 수", fcRatio: "월별 주차현황 : 입출차(2024년 7월)",
       statTotal: "전체 공연 자료", statClean: "문제 없는 자료", statRecent: "2024년 이후", statVenueRaw: "공연장 표기 종류",
       issuesH: "자동 점검 결과", variantsH: "공연장 표기 통일(2024년 이후)", raw: "원문 표기", canonical: "표준명", count: "건",
       issue: { venue_variant: "공연장 표기가 표준명과 다름", venue_blank: "공연장 빈칸·자리표", venue_unmatched: "공연장 판별 불가", non_show: "공연이 아닌 항목(대관 준비·예약 자리표)", duration_blank: "공연 시간 빈칸·자리표", duration_unparsed: "공연 시간 해석 불가", duplicate: "같은 제목·기간 중복 등록", period_unparsed: "기간 해석 불가" },
       qNotes: ["공연 자료는 문화 공공데이터광장 통합 공연정보(API_CCA_144)에서 한국체육산업개발(주) 분만 받아 매일 새로 만듭니다.", "표준 공연장 10종은 기관 누리집 일정안내의 공연장 구분을 따릅니다.", "공연이 아닌 항목은 2013~2015년 대관 시스템 자리표이며 화면의 일정에서는 제외합니다."],
-      source: (u) => `자료: 한국체육산업개발(주) 개방 공공데이터(공연정보·입출차·주차 안내), 한국문화정보원 통합 공연정보, 기상청 지상관측, 한국천문연구원 특일 정보 · 공연 자료 갱신 ${u}`,
+      source: (u) => `자료: 한국체육산업개발(주) 개방 공공데이터(공연정보·입출차·주차 안내), 한국문화정보원 통합 공연정보, 기상청 지상관측, 한국천문연구원 특일 정보 · 공연 자료 갱신 ${u}(한국 시각)`,
     },
     en: {
       brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
       todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
-      levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "The lot next to the venue will likely fill up. Arrive 30 minutes early or go straight to P1 (562 spaces).", "Roads to the parking gates jam at this hour. Take the subway (Olympic Park Station, Lines 5 and 9)."],
+      levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "The lot next to the venue will likely fill up. Arrive 30 minutes early or go straight to P1 (562 spaces).", "The busiest hours of the month (top 10%). Take the subway (Olympic Park Station, Lines 5 and 9)."],
       stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
-      sourcesH: "Data sources", sources: [
+      sourcesH: "Data sources", license: "KMA data: KOGL Type 1 (attribution). Other open data: per data.go.kr / Culture Public Data Plaza terms. Source code: MIT.", liveLink: "Live parking count (weekends): KSPO&CO parking page", sources: [
         ["KSPO&CO Olympic Park gate records (July 2024)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["KSPO&CO Olympic Park English show information", "https://www.data.go.kr/data/15149169/fileData.do"],
         ["KSPO&CO Olympic Park parking congestion and monthly parking", "https://www.data.go.kr/data/15164156/fileData.do"],
@@ -92,7 +94,7 @@
         `The 72 base values (3 weekday types × 24 hours), ${m.showEffect.factor.length} show-effect bins and the rain effect are estimated from 744 hours of July 2024 gate records; month factors are month-to-July ratios from monthly parking totals (2023 to 2025).`,
         `Show effect by hours to showtime: ${m.showEffect.bins.map((b, i) => `${b}h ×${m.showEffect.factor[i]}`).join(", ")}. Rain ×${m.rainEffect}.`,
         v.v1 ? `Validation (leave-one-day-out, 31 refits): mean absolute error ${v.v1.mae} cars/h, 4-level agreement ${Math.round(v.v1.levelAgree * 100)}%. The cell-average model (v0) scores ${v.cellAverage_v0.mae} / ${Math.round(v.cellAverage_v0.levelAgree * 100)}% and a weekday-hour-only average ${v.weekdayHourOnly.mae} / ${Math.round(v.weekdayHourOnly.levelAgree * 100)}%; with one month of data the show and rain effects do not add accuracy, and v1's merit is taking the showtime as an input and showing its reasoning.` : "",
-        "The show effect applies only from 6 hours before showtime; the month factor is an unvalidated assumption and the level thresholds are fixed to the July 2024 distribution.",
+        "The show effect applies only from 6 hours before showtime; the month factor is an unvalidated assumption. The level thresholds (July 50/75/90th percentiles) are scaled by the same month factor, so levels are relative to that month while the car count includes the month factor.",
         "The sample is one month (8 major-show days), so seasonal and year-end demand enters only through the month factor.",
         "All four Saturdays of July 2024 had major shows, so the Saturday baseline without a show is a model assumption.",
       ].filter(Boolean),
@@ -104,14 +106,14 @@
       wxManual: "using your manual choice (changing the date restores the forecast)", wxNone: last => `Outside the forecast range (through ${last}); choose rain manually.`,
       pty: { 0: "", 1: "rain", 2: "rain or snow", 3: "snow", 4: "showers" },
       timeUnknown: "Time not listed", timeCheck: "Time text check", booking: "Tickets", startAt: (v, t) => `${v} show starts at ${t}. In July 2024 records, inbound traffic rose 2 to 3 hours before showtime.`,
-      sessionsH: "Showtime check (official detail pages)", sessionsSub: "Open data has no per-day showtimes, so the service reads the \"time\" field of each official show page, normalises it into dated showtimes and flags text errors. All shows since 2026 plus every upcoming show are re-read daily.",
+      sessionsH: "Showtime check (official detail pages)", sessionsSub: "Open data has no per-day showtimes, so the service reads the \"time\" field of each official show page, normalises it into dated showtimes and flags text errors. Shows since 2026 are kept, and upcoming shows (within 120 days) are re-read daily.",
       sessRead: "Pages read", sessGot: "Showtimes found", sessBlank: "Blank / TBA", sessErr: "Text errors", sessShow: "Show", sessRaw: "As written", sessProblem: "Problem", sessFix: "Suggested fix",
       sessIssue: { date_outside: "Date outside show period (wrong month?)", weekday_mismatch: "Weekday does not match date", weekday_blank: "Weekday blank", time_format: "Incomplete time text", time_leftover: "Unparsed time text", time_unparsed: "Time not parseable", date_invalid: "Invalid date", period_mismatch: "Period differs from open data", time_blank: "Time blank", time_tbd: "To be announced", partial_days: "Showtimes on only some days", note: "Note", page_error: "Official page fails to load (server error)" },
       sessNote: "Flagged pages get a 'Time text check' tag on the schedule; when a fix is suggested, the showtime is placed on the corrected date. Check the official page for the original text.",
       titlesH: "English titles (official English board)", titlesSub: "The open dataset 'English show information' (15149169) is an export of the official English Culture Info board. The service reads that board and pairs each post with a show record by date and title word overlap. The English view uses these titles and the English ticketing links.",
       teItems: "English board posts", teLinked: "Linked to show records", teUpcoming: "Upcoming shows linked", teKoOnEn: "English posts titled only in Korean (2026+)", teDate: "Date", teTitle: "Title as posted on the English board",
       teNote: n => `When no title words overlap, a post is linked by date only if exactly one show starts that day (${n} posts, score 0.2). Korean-only titles on the English board cannot be found by foreign visitors.`,
-      filesH: "Open file check (parking congestion, monthly parking)", filesSub: "Two more open files from the same agency, not used directly by the service, checked for format and scale.",
+      filesH: "Open file check (parking congestion, monthly parking)", filesSub: "Two more open files from the same agency, checked for format and scale. The congestion file is only checked; the monthly parking file also feeds the forecast's month factor.",
       fcRows: "Congestion rows", fcTimeBug: "Time mm:ss equals date month:day", fcDays: "Days with entries", fcRatio: "Monthly total : gate records (July 2024)",
       fcFindingEn: "In every row the minute:second part of the time field equals the month:day of the date, so the time field is not a real time; a few manual entries per day cannot serve as an hourly congestion indicator.",
       moFindingEn: "The monthly parking total for July 2024 (59,808) is about 1/3.6 of the gate records for the same month (215,528), so the two files count different things (likely paid exits). The service uses only month-to-July ratios as a seasonal factor.",
@@ -119,10 +121,10 @@
       issuesH: "Automatic checks", variantsH: "Venue name unification (since 2024)", raw: "As written", canonical: "Standard", count: "n",
       issue: { venue_variant: "Venue differs from standard name", venue_blank: "Venue blank / placeholder", venue_unmatched: "Venue not recognised", non_show: "Not a show (booking placeholders)", duration_blank: "Running time blank", duration_unparsed: "Running time unreadable", duplicate: "Duplicate title and period", period_unparsed: "Period unreadable" },
       qNotes: ["Show data is rebuilt daily from the Culture Public Data Plaza integrated performance API (KSPO&CO records only).", "The 10 standard venues follow the venue tabs on the official schedule page.", "Non-show items are 2013-2015 booking placeholders and are hidden from the schedule."],
-      source: (u) => `Data: KSPO&CO open data (shows, gate records, parking), KCISA integrated performance API, KMA weather, KASI holidays · shows updated ${u}`,
+      source: (u) => `Data: KSPO&CO open data (shows, gate records, parking), KCISA integrated performance API, KMA weather, KASI holidays · shows updated ${u} (KST)`,
     },
   };
-  let lang = (localStorage.getItem("olpark.lang") || (navigator.language || "ko").startsWith("ko") ? "ko" : "en");
+  let lang = (navigator.language || "ko").startsWith("ko") ? "ko" : "en";
   try { lang = localStorage.getItem("olpark.lang") || lang; } catch (e) {}
   const T = k => I18N[lang][k];
 
@@ -138,7 +140,7 @@
     const rain = (s.pty || 0) !== 0 || (s.pop || 0) >= (w.rule ? w.rule.rainPop : 60);
     return { ...s, hour: pick, rain: rain ? 1 : 0 };
   }
-  function autoRain() { if (state.fc.rainMode !== "auto") return; const w = wxAt(state.fc.date, state.fc.hour); if (w) state.fc.rain = w.rain; }
+  function autoRain() { if (state.fc.rainMode !== "auto") return; const w = wxAt(state.fc.date, state.fc.hour); state.fc.rain = w ? w.rain : 0; }  // 단기예보 범위 밖은 비 없음으로 두고 직접 고르게 함
 
   async function load() {
     const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en", "weather", "files_check"];
@@ -202,7 +204,7 @@
       + (wd ? tile(T("todayWx"), `${wd.rainHours.length ? T("wxRainH")(+wd.rainHours[0]) : T("wxDry")} · ${T("wxPop")(wd.popMax ?? 0)}${wd.tmin != null ? ` · ${wd.tmin}~${wd.tmax}℃` : ""}`, true) : "");
   }
   function renderSources() {
-    $("#footSources").innerHTML = `<h4>${T("sourcesH")}</h4><ul>${T("sources").map(([n, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join("")}</ul>`;
+    $("#footSources").innerHTML = `<h4>${T("sourcesH")}</h4><ul>${T("sources").map(([n, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join("")}</ul><p class="small muted">${esc(T("license"))}</p>`;
   }
   function renderSchedule() {
     renderChips();
@@ -246,7 +248,7 @@
       </article>`; }).join("")).join("");
     $$("#scheduleList [data-fc]").forEach(b => b.onclick = () => { const [d, v, h] = b.dataset.fc.split("|"); state.fc.date = d; state.fc.venue = v; state.fc.hour = +h || 17; state.fc.rainMode = "auto"; syncForecastForm(); location.hash = "#forecast"; showTab("forecast"); });
     const n = new Set(list.map(s => s.id)).size;
-    $("#scheduleNote").textContent = lang === "ko" ? `${fmtDate(today)}부터 60일 안의 공연 ${n}건. 공연 자료 갱신 ${DATA.shows.updated}` : `${n} shows within 60 days from ${fmtDate(today)}. Data updated ${DATA.shows.updated}`;
+    $("#scheduleNote").textContent = lang === "ko" ? `${fmtDate(today)}부터 60일 안의 공연 ${n}건. 공연 자료 갱신 ${DATA.shows.updated}(한국 시각)` : `${n} shows within 60 days from ${fmtDate(today)}. Data updated ${DATA.shows.updated} (KST)`;
   }
 
   /* ---------- 2. 예보 ---------- */
@@ -262,6 +264,7 @@
     const starts = bigShowsOn(dateStr).flatMap(s => timesOn(s, dateStr)).map(t => +t.slice(0, 2));
     return starts.length ? starts : (bigShowsOn(dateStr).length ? [DATA.model.defaultStart[kind]] : []);
   }
+  function monthThresholds(dateStr) { const m = DATA.model, f = m.monthFactor[+dateStr.slice(5, 7) - 1] || 1; return Object.values(m.thresholds).map(x => Math.round(x * f)); }
   function lookup(dateStr, hour, big, rain) {
     const m = DATA.model, kind = dayKind(dateStr);
     const base = m.base[kind][hour], n = m.baseN[kind][hour];
@@ -277,9 +280,9 @@
     const rainF = rain ? m.rainEffect : 1;
     const monthF = m.monthFactor[+dateStr.slice(5, 7) - 1] || 1;
     v = v * rainF * monthF;
-    const th = Object.values(m.thresholds);
-    const lv = v >= th[2] ? 3 : v >= th[1] ? 2 : v >= th[0] ? 1 : 0;
-    return [Math.round(v), lv, n, { base: Math.round(base), showF, off, bin, rainF, monthF }];
+    const th = monthThresholds(dateStr);  // v1.2: 경계에도 월 보정
+    const r = Math.round(v), lv = r >= th[2] ? 3 : r >= th[1] ? 2 : r >= th[0] ? 1 : 0;
+    return [r, lv, n, { base: Math.round(base), showF, off, bin, rainF, monthF }];
   }
   function syncForecastForm() {
     $("#fcDate").value = state.fc.date; $("#fcHour").value = state.fc.hour; $("#fcVenue").value = state.fc.venue;
@@ -322,7 +325,7 @@
       </div>`;
     $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""} ${rh ? "rain" : ""}" title="${pad(h)}:00 · ${r[0]}${rh ? " ☂" : ""}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
     $("#stripTitle").textContent = T("stripTitle"); $("#stripHint").textContent = T("stripHint");
-    const th = Object.values(DATA.model.thresholds || {});
+    const th = monthThresholds(date);
     const lvNames = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;
     $("#fcLegend").innerHTML = lvNames.map((nm, i) => `<span><i class="l${i}"></i>${T("legendLv")(nm, i === 0 ? null : th[i - 1], i < th.length ? th[i] - 1 : null)}</span>`).join("");
     $$("#fcStrip div").forEach((el, h) => el.onclick = () => { state.fc.hour = h; syncForecastForm(); renderForecast(); });
@@ -331,7 +334,7 @@
       <dt>${T("lot")}</dt><dd>${esc(v.lot)}</dd><dt>${T("spaces")}</dt><dd>${v.lotSpaces ?? "-"}</dd>
       ${v.walk ? `<dt>${T("walk")}</dt><dd>${esc(v.walk)}</dd>` : ""}
       <dt>${T("gates")}</dt><dd>${(v.gates || []).join(" · ")}</dd><dt>${T("hours")}</dt><dd>${DATA.venues.parkingHours}</dd>
-      <dt>${T("feeH")}</dt><dd>${esc(DATA.venues.fee.small)}</dd></dl>` : `<p class="muted">${T("noLot")}</p>`);
+      <dt>${T("feeH")}</dt><dd>${esc(DATA.venues.fee.small)}</dd></dl>` : `<p class="muted">${T("noLot")}</p>`) + `<p class="small"><a href="https://www.ksponco.or.kr/online/main/parking.do" target="_blank" rel="noopener">${T("liveLink")}</a></p>`;
     $("#fcTransit").innerHTML = `<h3>${T("transitH")}</h3><ul class="plain">` + DATA.venues.subway.map(s => { const e = lang === "en" ? s.en : s; return `<li><b>${esc(e.line)} ${esc(e.station)}</b>${e.exit ? ` ${esc(e.exit)}` : ""} ${T("toward")} ${esc(e.gate)}</li>`; }).join("") + `</ul>`;
     $("#fcTips").innerHTML = `<h3>${T("tipsH")}</h3><ul class="plain">` + DATA.venues.alternatives.map(a => `<li>${esc(a[lang])}</li>`).join("") + `</ul>`;
     const m = DATA.model, val = m.validation || {};
@@ -398,10 +401,11 @@
   load().then(() => {
     try {  // 깊은 링크: ?date=2026-11-14&hour=16&venue=KSPO%20DOME (시연·캡처용)
       const q = new URLSearchParams(location.search);
-      if (q.get("date")) { state.fc.date = q.get("date"); state.fc.rainMode = "auto"; }
+      if (/^\d{4}-\d{2}-\d{2}$/.test(q.get("date") || "") && !isNaN(new Date(q.get("date") + "T00:00:00"))) { state.fc.date = q.get("date"); state.fc.rainMode = "auto"; }
       if (q.get("hour")) state.fc.hour = Math.min(23, Math.max(0, +q.get("hour") || 0));
       if (q.get("venue") && DATA.venues.venues[q.get("venue")]) state.fc.venue = q.get("venue");
       if (q.get("lang") === "en" || q.get("lang") === "ko") lang = q.get("lang");
+      if (!location.hash && (q.has("date") || q.has("hour") || q.has("venue"))) history.replaceState(null, "", location.pathname + location.search + "#forecast");  // 예보 값을 준 주소는 예보 탭으로
     } catch (e) {}
     renderAll();
     $("#langBtn").onclick = () => { lang = lang === "ko" ? "en" : "ko"; try { localStorage.setItem("olpark.lang", lang); } catch (e) {} renderAll(); };

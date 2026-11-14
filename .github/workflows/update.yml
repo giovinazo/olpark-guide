@@ -6,6 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: update-data
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -15,6 +18,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Build data
+        continue-on-error: true  # 공연 API가 실패해도 날씨·회차 갱신은 계속(지난 공연 자료 유지)
         env:
           KCISA_KEY: ${{ secrets.KCISA_KEY }}
         run: python3 scripts/build_data.py
@@ -31,4 +35,4 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/shows.json data/quality.json data/details.json data/titles_en.json data/weather.json
-          git diff --cached --quiet || (git commit -m "data: daily update $(date -u +%Y-%m-%d)" && git push)
+          git diff --cached --quiet || (git commit -m "data: daily update $(TZ=Asia/Seoul date +%Y-%m-%d)" && git pull --rebase && git push)

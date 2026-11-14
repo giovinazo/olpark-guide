@@ -140,6 +140,11 @@ def main():
         if not key:
             sys.exit("KCISA_KEY 환경변수가 없습니다")
         items = fetch_all(key)
+    prev_path = os.path.join(DATA, "shows.json")
+    if os.path.exists(prev_path) and "--force" not in sys.argv:  # 빈 응답·일부 응답으로 지난 자료를 덮어쓰지 않음
+        prev_n = len(json.load(open(prev_path, encoding="utf-8")).get("shows", []))
+        if len(items) < prev_n * 0.9:
+            sys.exit(f"받은 공연 {len(items)}건이 지난 자료 {prev_n}건의 90%보다 적어 갱신하지 않습니다(--force로 강제)")
     shows = build(items)
     os.makedirs(DATA, exist_ok=True)
     json.dump({"updated": dt.datetime.now(dt.timezone(dt.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M"), "source": "문화 공공데이터광장 통합 공연정보(API_CCA_144) 중 한국체육산업개발(주)", "shows": shows},
