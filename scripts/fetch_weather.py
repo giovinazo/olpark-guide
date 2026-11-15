@@ -33,15 +33,23 @@ def latest_base(now):
 
 
 def fetch(key, bd, bt):
-    q = urllib.parse.urlencode({"serviceKey": key, "numOfRows": 1000, "pageNo": 1, "dataType": "JSON",
-                                "base_date": bd, "base_time": bt, "nx": NX, "ny": NY})
-    with urllib.request.urlopen(urllib.request.Request(f"{API}?{q}"), timeout=60, context=ssl_ctx()) as r:
-        j = json.load(r)
-    hdr = j["response"]["header"]
-    if hdr.get("resultCode") != "00":
-        raise RuntimeError(f"{hdr.get('resultCode')} {hdr.get('resultMsg')}")
-    items = j["response"]["body"]["items"]["item"]
-    return [items] if isinstance(items, dict) else items
+    """한 발표분 전체(20시 발표는 1,000건을 넘으므로 쪽을 넘겨 받음)"""
+    out, page = [], 1
+    while page <= 5:
+        q = urllib.parse.urlencode({"serviceKey": key, "numOfRows": 1000, "pageNo": page, "dataType": "JSON",
+                                    "base_date": bd, "base_time": bt, "nx": NX, "ny": NY})
+        with urllib.request.urlopen(urllib.request.Request(f"{API}?{q}"), timeout=60, context=ssl_ctx()) as r:
+            j = json.load(r)
+        hdr = j["response"]["header"]
+        if hdr.get("resultCode") != "00":
+            raise RuntimeError(f"{hdr.get('resultCode')} {hdr.get('resultMsg')}")
+        body = j["response"]["body"]
+        items = body["items"]["item"]
+        out += [items] if isinstance(items, dict) else items
+        if len(out) >= int(body.get("totalCount", 0)):
+            break
+        page += 1
+    return out
 
 
 def build(items):
