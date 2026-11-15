@@ -1,23 +1,23 @@
 {
- "generated": "2026-11-15 10:07",
- "total": 2780,
- "clean": 877,
+ "generated": "2026-11-15 17:07",
+ "total": 2782,
+ "clean": 879,
  "counts": {
   "venue_blank": 107,
-  "duration_blank": 1348,
+  "duration_blank": 1349,
   "venue_variant": 987,
   "duration_unparsed": 27,
-  "non_show": 812,
   "venue_unmatched": 8,
+  "non_show": 811,
   "duplicate": 205
  },
  "recent": {
   "from": "2024-01-01",
-  "total": 385,
-  "clean": 143,
+  "total": 387,
+  "clean": 144,
   "counts": {
    "venue_variant": 165,
-   "duration_blank": 115,
+   "duration_blank": 116,
    "venue_unmatched": 1,
    "duration_unparsed": 5
   },
@@ -102,7 +102,7 @@
  "venues": {
   "미상": 115,
   "우리금융아트홀": 202,
-  "KSPO DOME": 663,
+  "KSPO DOME": 665,
   "옥외·기타": 39,
   "올림픽홀": 799,
   "뮤즈라이브": 269,
