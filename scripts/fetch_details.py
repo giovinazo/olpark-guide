@@ -62,8 +62,8 @@ def parse_page(body):
 
 # ---------- 회차 시각 해석 ----------
 TOKEN = re.compile(r"""
-  (?P<date>(?:(?P<y>20\d{2})\s*[년.]\s*)?(?:(?P<mo>\d{1,2})\s*[월.]\s*)?(?P<d>\d{1,2})\s*(?:일|\.(?=\s*\()|(?=\s*[\(\-~]|\s*$|\s*[월화수목금토일]|\.\s*\())\s*
-     (?:\(\s*(?P<wd1>[월화수목금토일]|SAT|SUN|MON|TUE|WED|THU|FRI)\s*(?:요일)?\s*\)|\s*(?P<wd2>[월화수목금토일])요일|\s*(?P<wd3>[월화수목금토일])(?=\s)|\(\s*\))?)
+  (?P<date>(?:(?P<y>20\d{2})\s*[년.]\s*)?(?:(?P<mo>\d{1,2})\s*[월.]\s*)?(?P<d>\d{1,2})\s*(?:일|\.(?=\s*\()|(?=\s*[\(\-~]|\s*$|\s*[월화수목금토일]|\.\s*\()|\.?(?=\s*(?:MON|TUE|WED|THU|FRI|SAT|SUN)\b))\s*
+     (?:\(\s*(?P<wd1>[월화수목금토일]|SAT|SUN|MON|TUE|WED|THU|FRI)\s*(?:요일)?\s*\)|\s*(?P<wd2>[월화수목금토일])요일|\s*(?P<wd3>[월화수목금토일])(?=\s)|\s*(?P<wd4>MON|TUE|WED|THU|FRI|SAT|SUN)\b|\(\s*\))?)
  |(?P<time>(?P<ap>오전|오후|낮|저녁|밤)?\s*(?P<h>\d{1,2})\s*(?::\s*(?P<mi>\d{2})\s*(?P<ap2>AM|PM)?|\s*(?P<ap3>AM|PM)|\s*시\s*(?:(?P<mi2>\d{1,2})\s*분)?(?:\s*반)?|(?P<bare>)(?=\s*[,、/·]|\s*$|\s*\(|\s*공연)))
  |(?P<wdrange>[월화수목금토일]\s*[~\-]\s*[월화수목금토일])
  |(?P<wdclass>주말\s*(?:[&,·]\s*공휴일)?|공휴일|평일)
@@ -141,7 +141,7 @@ def parse_time_text(raw, start, end):
         if m.group("date"):
             new_group("date")
             d = resolve(m.group("y"), m.group("mo"), m.group("d"))
-            wd = m.group("wd1") or m.group("wd2") or m.group("wd3")
+            wd = m.group("wd1") or m.group("wd2") or m.group("wd3") or m.group("wd4")  # wd4: "12.19 SAT"처럼 영문 요일
             if d is None:
                 checks.append({"kind": "date_invalid", "text": m.group("date").strip()})
                 continue
