@@ -33,7 +33,7 @@ scripts/fetch_titles_en.py 영문 게시판 수집·공연정보와 짝짓기(�
 scripts/fetch_weather.py   기상청 단기예보 수집(비 입력 자동 채움)
 scripts/build_model.py     혼잡 예보 모델 추정·하루씩 빼고 검증(numpy)
 scripts/build_link_table.py 입출차 원자료(공공데이터포털 15138735)+ASOS+공휴일+공연 일정 → 시간별 연계표
-scripts/check_files.py     개방 파일 2종 점검
+scripts/check_files.py     개방 파일 2종 점검, 혼잡도 자료와 대형 공연일 대조
 .github/workflows/         매일 06:23·18:37(KST) 자료 갱신(공연 API 실패 시에도 날씨·회차는 갱신)
 ```
 

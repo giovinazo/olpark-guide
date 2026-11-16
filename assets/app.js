@@ -41,6 +41,7 @@
         `공연 효과(시작 시각까지의 거리): ${m.showEffect.bins.map((b, i) => `${b}시간 ×${m.showEffect.factor[i]}`).join(", ")}. 비 효과 ×${m.rainEffect}.`,
         v.v1 ? `검증(${v.method}): 평균 절대 오차 ${v.v1.mae}대/시간, 4단계 수준 일치 ${Math.round(v.v1.levelAgree * 100)}%. 칸 평균 방식(v0) ${v.cellAverage_v0.mae}대·${Math.round(v.cellAverage_v0.levelAgree * 100)}%, 요일·시각 평균만 쓴 방식 ${v.weekdayHourOnly.mae}대·${Math.round(v.weekdayHourOnly.levelAgree * 100)}%와 정확도가 비슷합니다. 한 달치 표본에서는 공연·비 효과가 정확도를 더 올리지 못하며, v1의 장점은 회차 시각을 입력으로 쓰고 근거를 풀어 보여 주는 데 있습니다.` : "",
         `공연 효과는 시작 6시간 전부터만 적용하고, 월 보정은 검증하지 않은 가정값입니다. 수준 경계(7월 50·75·90 백분위 ${Object.values(m.thresholds).join('·')}대)와 예상 대수에 같은 월 보정을 곱하므로 월은 수준을 바꾸지 않습니다. 수준은 그 달 안에서의 상대 혼잡이고, 월 보정은 예상 대수에만 드러납니다.`,
+        sdNote("ko"),
         ...(m.limits || []),
       ].filter(Boolean),
       bigOn: v => `이날 ${v} 공연이 있어 공연 수요를 더했습니다.`, bigOff: "이날 대형 공연장(KSPO DOME·핸드볼경기장) 공연이 없습니다.",
@@ -58,7 +59,7 @@
       titlesH: "영문 제목 연결(기관 영문 게시판)", titlesSub: "개방 데이터 '영문 공연정보'(15149169)의 원천인 기관 영문 누리집 Culture Info 게시판을 읽어, 공연정보와 날짜·제목 낱말 겹침으로 짝을 짓습니다. 영어 화면에서는 이 제목과 외국인용 예매처 링크를 씁니다.",
       teItems: "영문 게시판 글", teLinked: "공연정보와 연결", teUpcoming: "다가오는 공연 연결", teKoOnEn: "영문 글인데 한국어 제목(2026년~)", teDate: "날짜", teTitle: "영문 게시판 제목 그대로",
       teNote: n => `제목 낱말이 안 겹치면 시작일이 같은 공연이 하나뿐일 때만 날짜로 연결합니다(${n}건, 점수 0.2). 한국어 제목 그대로인 영문 글은 외국인 관람객이 검색하지 못하는 항목입니다.`,
-      filesH: "개방 파일 점검(주차장 혼잡도 정보·월별 주차현황)", filesSub: "같은 기관 개방 파일 2종을 받아 형식과 규모를 점검한 결과입니다. 혼잡도 정보는 점검만 하고, 월별 주차현황은 예보의 월 보정에도 씁니다.",
+      filesH: "개방 파일 점검(주차장 혼잡도 정보·월별 주차현황)", filesSub: "같은 기관 개방 파일 2종을 받아 형식과 규모를 점검한 결과입니다. 혼잡도 정보는 점검과 대형 공연일 대조에만 쓰고, 월별 주차현황은 예보의 월 보정에도 씁니다.",
       fcRows: "혼잡도 등록 행", fcTimeBug: "등록시간 분:초 = 등록일 월:일", fcDays: "등록된 날 수", fcRatio: "월별 주차현황 : 입출차(2024년 7월)",
       statTotal: "전체 공연 자료", statClean: "문제 없는 자료", statRecent: "2024년 이후", statVenueRaw: "공연장 표기 종류",
       issuesH: "자동 점검 결과", variantsH: "공연장 표기 통일(2024년 이후)", raw: "원문 표기", canonical: "표준명", count: "건",
@@ -97,6 +98,7 @@
         `Show effect by hours to showtime: ${m.showEffect.bins.map((b, i) => `${b}h ×${m.showEffect.factor[i]}`).join(", ")}. Rain ×${m.rainEffect}.`,
         v.v1 ? `Validation (leave-one-day-out, 31 refits): mean absolute error ${v.v1.mae} cars/h, 4-level agreement ${Math.round(v.v1.levelAgree * 100)}%. The cell-average model (v0) scores ${v.cellAverage_v0.mae} / ${Math.round(v.cellAverage_v0.levelAgree * 100)}% and a weekday-hour-only average ${v.weekdayHourOnly.mae} / ${Math.round(v.weekdayHourOnly.levelAgree * 100)}%; with one month of data the show and rain effects do not add accuracy, and v1's merit is taking the showtime as an input and showing its reasoning.` : "",
         "The show effect applies only from 6 hours before showtime; the month factor is an unvalidated assumption. Both the level thresholds (July 50/75/90th percentiles) and the car count are scaled by the same month factor, so the month does not change the level: levels are relative to that month, and the month factor shows only in the car count.",
+        sdNote("en"),
         "The sample is one month (8 major-show days), so seasonal and year-end demand enters only through the month factor.",
         "All four Saturdays of July 2024 had major shows, so the Saturday baseline without a show is a model assumption.",
       ].filter(Boolean),
@@ -115,7 +117,7 @@
       titlesH: "English titles (official English board)", titlesSub: "The open dataset 'English show information' (15149169) is an export of the official English Culture Info board. The service reads that board and pairs each post with a show record by date and title word overlap. The English view uses these titles and the English ticketing links.",
       teItems: "English board posts", teLinked: "Linked to show records", teUpcoming: "Upcoming shows linked", teKoOnEn: "English posts titled only in Korean (2026+)", teDate: "Date", teTitle: "Title as posted on the English board",
       teNote: n => `When no title words overlap, a post is linked by date only if exactly one show starts that day (${n} posts, score 0.2). Korean-only titles on the English board cannot be found by foreign visitors.`,
-      filesH: "Open file check (parking congestion, monthly parking)", filesSub: "Two more open files from the same agency, checked for format and scale. The congestion file is only checked; the monthly parking file also feeds the forecast's month factor.",
+      filesH: "Open file check (parking congestion, monthly parking)", filesSub: "Two more open files from the same agency, checked for format and scale. The congestion file is only checked and compared with major-show days; the monthly parking file also feeds the forecast's month factor.",
       fcRows: "Congestion rows", fcTimeBug: "Time mm:ss equals date month:day", fcDays: "Days with entries", fcRatio: "Monthly total : gate records (July 2024)",
       fcFindingEn: "In every row the minute:second part of the time field equals the month:day of the date, so the time field is not a real time; a few manual entries per day cannot serve as an hourly congestion indicator.",
       moFindingEn: "The monthly parking total for July 2024 (59,808) is about 1/3.6 of the gate records for the same month (215,528), so the two files count different things (likely paid exits). The service uses only month-to-July ratios as a seasonal factor.",
@@ -391,7 +393,16 @@
     const stat = (n, l) => `<div class="stat"><div class="n">${n}</div><div class="l">${l}</div></div>`;
     el.innerHTML = `<h3>${T("filesH")}</h3><p class="muted small">${T("filesSub")}</p>
       <div class="stats">${stat(c.rows.toLocaleString(), T("fcRows"))}${stat(`${c.timeMinSecEqualsMonthDay.toLocaleString()} <span class="small muted">(${Math.round(c.timeMinSecEqualsMonthDay / c.rows * 100)}%)</span>`, T("fcTimeBug"))}${stat(c.distinctDays, T("fcDays"))}${stat(mo.ratioGateToMonthly ? `1 : ${mo.ratioGateToMonthly}` : "-", T("fcRatio"))}</div>
-      <ul class="plain"><li>${esc(lang === "ko" ? c.finding : T("fcFindingEn"))}</li><li>${esc(lang === "ko" ? mo.finding : T("moFindingEn"))}</li></ul>`;
+      <ul class="plain"><li>${esc(lang === "ko" ? c.finding : T("fcFindingEn"))}</li>${c.showDays ? `<li>${esc(lang === "ko" ? c.showDays.finding : sdNote("en"))}</li>` : ""}<li>${esc(lang === "ko" ? mo.finding : T("moFindingEn"))}</li></ul>`;
+  }
+
+  function sdNote(l) {  // 기관 혼잡도 자료(15164156)와 대형 공연일 대조 결과 한 줄(scripts/check_files.py)
+    const sd = DATA.files_check && DATA.files_check.congestion && DATA.files_check.congestion.showDays;
+    if (!sd) return "";
+    const w = sd.weekend_big, wo = sd.weekend_other, d = sd.weekday_big, dn = sd.weekday_other;
+    return l === "ko"
+      ? `기관 주차장 혼잡도 자료(${sd.all_big.days + sd.all_other.days}일)와 대조: 주말·공휴일 만차 비율은 대형 공연일 ${w.fullPct}%(${w.days}일)와 그 밖 ${wo.fullPct}%(${wo.days}일)로 차이가 없고, 평일은 대형 공연일이 ${d.days}일(${d.fullPct}%, 그 밖 ${dn.fullPct}%)뿐이라 공연 효과를 이 자료로 따로 확인하지 못했습니다.`
+      : `Check against the agency's parking congestion file (${sd.all_big.days + sd.all_other.days} days): on weekends and holidays the share of "full" entries is ${w.fullPct}% on major-show days (${w.days} days) and ${wo.fullPct}% on other days (${wo.days} days), no difference; only ${d.days} weekdays had major shows (${d.fullPct}% vs ${dn.fullPct}%), so this file cannot confirm the show effect on its own.`;
   }
 
   function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
