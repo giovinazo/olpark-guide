@@ -29,7 +29,7 @@ data/venues.json           공연장별 주차장·출입문·지하철
 data/holidays.json         공휴일(2024~2027, 한국천문연구원)
 scripts/build_data.py      공연 자료 수집·표준화·점검
 scripts/fetch_details.py   누리집 상세 글 수집·회차 시각 해석·표기 점검
-scripts/fetch_titles_en.py 영문 게시판 수집·공연정보와 짝짓기(날짜·제목 낱말 겹침)
+scripts/fetch_titles_en.py 영문 게시판 수집·공연정보와 짝짓기(날짜·제목 낱말 겹침, 사람이 확인한 오연결은 data/source/en_link_block.csv로 막음)
 scripts/fetch_weather.py   기상청 단기예보 수집(비 입력 자동 채움)
 scripts/build_model.py     혼잡 예보 모델 추정·하루씩 빼고 검증(numpy)
 scripts/build_link_table.py 입출차 원자료(공공데이터포털 15138735)+ASOS+공휴일+공연 일정 → 시간별 연계표

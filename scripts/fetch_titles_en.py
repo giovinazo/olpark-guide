@@ -22,6 +22,13 @@ STOP = {"the", "in", "seoul", "concert", "tour", "live", "world", "of", "and", "
         "korea", "festival", "special", "show", "encore", "final", "on", "to", "ver", "st", "nd", "rd", "th", "anniversary",
         "kspo", "dome", "olympic", "hall", "park", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026", "2027"}
 WIN_DAYS = 45
+BLOCK = os.path.join(DATA, "source", "en_link_block.csv")   # 사람이 대조해 틀린 것으로 확인한 (영문 글 번호, 공연 id) 짝
+
+
+def load_block():
+    if not os.path.exists(BLOCK):
+        return set()
+    return {(r["no"], r["id"]) for r in csv.DictReader(open(BLOCK, encoding="utf-8-sig"))}
 
 
 def ssl_ctx():
@@ -92,6 +99,7 @@ def toks(s):
 def match(items, shows):
     """영문 글 → 공연 자료. 날짜 창(±45일) 안에서 제목 낱말 겹침(자카드)이 가장 큰 공연. 0.3 미만은 미연결."""
     by_id, unmatched = {}, []
+    block = load_block()
     cands = [s for s in shows if s.get("start") and "non_show" not in s["issues"]]
     for it in items:
         try:
@@ -103,14 +111,14 @@ def match(items, shows):
         best, bscore = None, 0
         for s in cands:
             sd = dt.date.fromisoformat(s["start"])
-            if abs((sd - d).days) > WIN_DAYS:
+            if abs((sd - d).days) > WIN_DAYS or (it["no"], s["id"]) in block:
                 continue
             st = toks(s["title"])
             if not tk or not st:
                 continue
             j = len(tk & st) / len(tk | st)
-            # 한쪽이 다른 쪽에 통째로 들어가면 가점(한글 제목 안의 영문 부제 등)
-            if tk <= st or st <= tk:
+            # 한쪽이 다른 쪽에 통째로 들어가면 가점(한글 제목 안의 영문 부제 등). 낱말 1개뿐인 쪽은 제외('music'만 겹친 오연결 방지)
+            if (tk <= st or st <= tk) and min(len(tk), len(st)) >= 2:
                 j = max(j, 0.6)
             if j > bscore:
                 best, bscore = s, j
@@ -121,14 +129,19 @@ def match(items, shows):
         if prev and prev["score"] >= bscore:
             continue
         by_id[best["id"]] = {"en": norm(it["en"]), "ticket": it["ticket"], "date": it["date"], "no": it["no"], "score": round(bscore, 2), "how": "title"}
-    # 2차: 제목으로 못 맞춘 글은 시작일이 같은 공연이 하나뿐일 때만 날짜로 연결(낮은 점수, how=date)
+    # 2차: 제목으로 못 맞춘 글은 시작일이 같은 (아직 연결 안 된) 공연이 하나뿐이고, 그 날짜의 못 맞춘 영문 글도 하나뿐일 때만 날짜로 연결(낮은 점수, how=date).
+    #      우연히 날짜만 같은 오연결은 사람이 대조해 data/source/en_link_block.csv 로 막음
     still = []
+    en_per_date = {}
+    for it in unmatched:
+        if it["why"] == "nomatch":
+            en_per_date[it["date"]] = en_per_date.get(it["date"], 0) + 1
     for it in unmatched:
         if it["why"] != "nomatch":
             still.append(it)
             continue
-        same = [s for s in cands if s["start"] == it["date"] and s["id"] not in by_id]
-        if len(same) == 1 and not re.search(r"[가-힣]", it["en"]):
+        same = [s for s in cands if s["start"] == it["date"] and s["id"] not in by_id and (it["no"], s["id"]) not in block]
+        if len(same) == 1 and en_per_date[it["date"]] == 1 and not re.search(r"[가-힣]", it["en"]):
             by_id[same[0]["id"]] = {"en": norm(it["en"]), "ticket": it["ticket"], "date": it["date"], "no": it["no"], "score": 0.2, "how": "date"}
         else:
             still.append(it)
