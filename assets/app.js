@@ -11,7 +11,7 @@
 
   const I18N = {
     ko: {
-      brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
+      skip: "본문 바로가기", brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
       todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
       levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "그 달 안에서 들어오는 차가 많은 시간대(상위 10~25%)입니다. 30분 일찍 오거나 큰 주차장 P1(562대)을 바로 이용하십시오.", "그 달 안에서 들어오는 차가 가장 많은 시간대(상위 10%)입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
       stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
@@ -27,7 +27,7 @@
         ["올림픽공원 누리집 공연 일정안내·주차 안내(회차 시각·주차장 위치)", "https://www.ksponco.or.kr/olympicpark/"],
       ],
       "schedule.title": "다가오는 공연", "schedule.sub": "공공데이터의 공연장 이름을 하나로 맞추고 기간을 날짜별로 풀어 보여 줍니다.",
-      "forecast.title": "주차 혼잡 예보", "forecast.sub": "요일·시각·공연 시작 시각까지의 거리·비로 그 시간대 입차 수준을 예상하고, 월 보정을 곱해 예상 대수를 냅니다. 2024년 7월 입출차 21만 5천 건으로 추정했고 검증 수치는 아래 '예보 모델 근거'에 있습니다.",
+      "forecast.title": "주차 혼잡 예보", "forecast.sub": "요일·시각·공연 시작까지 남은 시간·비로 그 시간대 입차 수준을 예상하고, 월 보정을 곱해 예상 대수를 냅니다. 2024년 7월 입출차 21만 5천 건으로 추정했고 검증 수치는 아래 '예보 모델 근거'에 있습니다.",
       "forecast.date": "날짜", "forecast.hour": "시각", "forecast.venue": "공연장", "forecast.rain": "비 예보", "forecast.clear": "맑음", "forecast.rainy": "비",
       "quality.title": "데이터 점검판", "quality.sub": "서비스가 공연 자료를 받을 때 자동으로 걸러 낸 항목입니다. 표기 통일과 빈칸 보완이 필요한 곳을 보여 줍니다.",
       "foot.disclaimer": "예보는 과거 입출차 기록으로 추정한 값이며 실제 주차 가능 대수와 다를 수 있습니다. 공연 정보는 기관 누리집 원문을 확인하십시오.",
@@ -38,7 +38,7 @@
       modelH: "예보 모델 근거", modelNotes: (m, v) => [
         `계산식: ${m.formula}`,
         `기준값 72칸(요일구분 3×시각 24)·공연 효과 ${m.showEffect.factor.length}구간·비 효과는 2024년 7월 입출차 744시간으로 추정, 월 보정은 월별 주차현황(2023~2025년)의 7월 대비 비율입니다.`,
-        `공연 효과(시작 시각까지의 거리): ${m.showEffect.bins.map((b, i) => `${b}시간 ×${m.showEffect.factor[i]}`).join(", ")}. 비 효과 ×${m.rainEffect}.`,
+        `공연 효과(공연 시작까지 남은 시간): ${m.showEffect.bins.map((b, i) => `${b}시간 ×${m.showEffect.factor[i]}`).join(", ")}. 비 효과 ×${m.rainEffect}.`,
         v.v1 ? `검증(${v.method}): 평균 절대 오차 ${v.v1.mae}대/시간, 4단계 수준 일치 ${Math.round(v.v1.levelAgree * 100)}%. 칸 평균 방식(v0) ${v.cellAverage_v0.mae}대·${Math.round(v.cellAverage_v0.levelAgree * 100)}%, 요일·시각 평균만 쓴 방식 ${v.weekdayHourOnly.mae}대·${Math.round(v.weekdayHourOnly.levelAgree * 100)}%와 정확도가 비슷합니다. 한 달치 표본에서는 공연·비 효과가 정확도를 더 올리지 못하며, v1의 장점은 회차 시각을 입력으로 쓰고 근거를 풀어 보여 주는 데 있습니다.` : "",
         `공연 효과는 시작 6시간 전부터만 적용하고, 월 보정은 검증하지 않은 가정값입니다. 수준 경계(7월 50·75·90 백분위 ${Object.values(m.thresholds).join('·')}대)와 예상 대수에 같은 월 보정을 곱하므로 월은 수준을 바꾸지 않습니다. 수준은 그 달 안에서의 상대 혼잡이고, 월 보정은 예상 대수에만 드러납니다.`,
         sdNote("ko"),
@@ -68,7 +68,7 @@
       source: (u) => `자료: 한국체육산업개발(주) 개방 공공데이터(입출차·영문 공연정보·월별 주차현황·혼잡도), 한국문화정보원 통합 공연정보(기관 등록분), 기상청 단기예보·지상관측, 한국천문연구원 특일 정보, 올림픽공원 누리집(회차 시각·주차 안내) · 공연 자료 갱신 ${u}(한국 시각)`, stale: " · 공연 자료가 하루 넘게 갱신되지 않아 지난 자료를 보여 주고 있습니다",
     },
     en: {
-      brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
+      skip: "Skip to main content", brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
       todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
       levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "One of the busier hours of the month (top 10 to 25%). Arrive 30 minutes early or go straight to P1 (562 spaces).", "The busiest hours of the month (top 10%). Take the subway (Olympic Park Station, Lines 5 and 9)."],
       stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
@@ -84,7 +84,7 @@
         ["Olympic Park website schedule and parking pages (showtimes, lot locations)", "https://www.ksponco.or.kr/olympicpark/"],
       ],
       "schedule.title": "Upcoming shows", "schedule.sub": "Venue names from open data are unified and multi-day runs are expanded by date.",
-      "forecast.title": "Parking forecast", "forecast.sub": "Expected inbound level by weekday type, hour, distance to showtime and rain, with the car count scaled by a month factor; estimated from 215,528 gate records of July 2024. Validation figures are under 'How the forecast is made'.",
+      "forecast.title": "Parking forecast", "forecast.sub": "Expected inbound level by weekday type, hour, time left to showtime and rain, with the car count scaled by a month factor; estimated from 215,528 gate records of July 2024. Validation figures are under 'How the forecast is made'.",
       "forecast.date": "Date", "forecast.hour": "Hour", "forecast.venue": "Venue", "forecast.rain": "Rain", "forecast.clear": "Clear", "forecast.rainy": "Rain",
       "quality.title": "Data check", "quality.sub": "Items the service flagged automatically while loading show data: inconsistent venue names and blanks.",
       "foot.disclaimer": "Forecasts are estimates from past gate records and may differ from actual availability. Check the official page for show details.",
@@ -93,7 +93,7 @@
       expected: n => `About ${n} cars entering per hour`, basis: (n, b) => `${n} sample hours · ${b}`, basisD: "same conditions", basisR: "rain ignored", basisS: "shows ignored",
       basisV1: (b, mo) => `Base ${b.base} cars (model baseline for this weekday type and hour, July 2024, show and rain effects removed)${b.showF !== 1 ? ` × show ${b.showF} (${b.off < 0 ? `${-b.off}h before start` : b.off === 0 ? "at start" : `${b.off}h after start`})` : ""}${b.rainF !== 1 ? ` × rain ${b.rainF}` : ""}${b.monthF !== 1 ? ` × month ${b.monthF}` : ""}`,
       modelH: "How the forecast is made", modelNotes: (m, v) => [
-        `Formula: hourly inbound = base[weekday type][hour] × show effect[distance to showtime] × rain effect × month factor.`,
+        `Formula: hourly inbound = base[weekday type][hour] × show effect[time to showtime] × rain effect × month factor.`,
         `The 72 base values (3 weekday types × 24 hours), ${m.showEffect.factor.length} show-effect bins and the rain effect are estimated from 744 hours of July 2024 gate records; month factors are month-to-July ratios from monthly parking totals (2023 to 2025).`,
         `Show effect by hours to showtime: ${m.showEffect.bins.map((b, i) => `${b}h ×${m.showEffect.factor[i]}`).join(", ")}. Rain ×${m.rainEffect}.`,
         v.v1 ? `Validation (leave-one-day-out, 31 refits): mean absolute error ${v.v1.mae} cars/h, 4-level agreement ${Math.round(v.v1.levelAgree * 100)}%. The cell-average model (v0) scores ${v.cellAverage_v0.mae} / ${Math.round(v.cellAverage_v0.levelAgree * 100)}% and a weekday-hour-only average ${v.weekdayHourOnly.mae} / ${Math.round(v.weekdayHourOnly.levelAgree * 100)}%; with one month of data the show and rain effects do not add accuracy, and v1's merit is taking the showtime as an input and showing its reasoning.` : "",
@@ -260,7 +260,7 @@
     return d.getDay() === 6 ? "sat" : "wd";
   }
   function bigShowsOn(dateStr) { return DATA.shows.shows.filter(s => isShow(s) && s.big && s.start <= dateStr && s.end >= dateStr); }
-  /* 모델 v1: 기준[요일구분][시] × 공연효과[시작까지 거리] × 비효과 × 월보정 → [예상 입차, 수준, 표본 시간, 근거] */
+  /* 모델 v1: 기준[요일구분][시] × 공연효과[시작까지 남은 시간] × 비효과 × 월보정 → [예상 입차, 수준, 표본 시간, 근거] */
   function bigStartsOn(dateStr) {
     const kind = dayKind(dateStr);
     const starts = bigShowsOn(dateStr).flatMap(s => timesOn(s, dateStr)).map(t => +t.slice(0, 2));
