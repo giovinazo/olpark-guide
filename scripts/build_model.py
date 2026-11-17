@@ -156,7 +156,7 @@ def main():
                        "cellAverage_v0": {"mae": round(err0 / n, 1), "levelAgree": round(agree0 / n, 3)},
                        "weekdayHourOnly": {"mae": round(errs / n, 1), "levelAgree": round(agrees / n, 3)}},
         "showDays": sorted({r["date"] for r in rows if r["big"]}),
-        "limits": ["표본이 2024년 7월 한 달(대형 공연일 8일)이라 계절·연말 수요는 월 보정으로만 반영", "2024년 7월 토요일 4일이 모두 대형 공연일이어서 공연 없는 토요일 기준은 모형 가정으로 추정"],
+        "limits": ["표본이 2024년 7월 한 달(대형 공연일 8일)이라 계절·연말 수요는 월 보정으로만 반영", "2024년 7월 토요일 4일이 모두 대형 공연일이어서 대형 공연 없는 토요일 기준값은 모델 가정으로 추정"],
     }
     json.dump(model, open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
     print("thresholds", th, "| showEffect", dict(zip(model["showEffect"]["bins"], show_eff)), "| rain", rain_eff)

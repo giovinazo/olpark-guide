@@ -64,7 +64,7 @@ def parse_page(body):
 TOKEN = re.compile(r"""
   (?P<date>(?:(?P<y>20\d{2})\s*[년.]\s*)?(?:(?P<mo>\d{1,2})\s*[월.]\s*)?(?P<d>\d{1,2})\s*(?:일|\.(?=\s*\()|(?=\s*[\(\-~]|\s*$|\s*[월화수목금토일]|\.\s*\()|\.?(?=\s*(?:MON|TUE|WED|THU|FRI|SAT|SUN)\b))\s*
      (?:\(\s*(?P<wd1>[월화수목금토일]|SAT|SUN|MON|TUE|WED|THU|FRI)\s*(?:요일)?\s*\)|\s*(?P<wd2>[월화수목금토일])요일|\s*(?P<wd3>[월화수목금토일])(?=\s)|\s*(?P<wd4>MON|TUE|WED|THU|FRI|SAT|SUN)\b|\(\s*\))?)
- |(?P<time>(?P<ap>오전|오후|낮|저녁|밤)?\s*(?P<h>\d{1,2})\s*(?::\s*(?P<mi>\d{2})\s*(?P<ap2>AM|PM)?|\s*(?P<ap3>AM|PM)|\s*시\s*(?:(?P<mi2>\d{1,2})\s*분)?(?:\s*반)?|(?P<bare>)(?=\s*[,、/·]|\s*$|\s*\(|\s*공연)))
+ |(?P<time>(?P<ap>오전|오후|낮|저녁|밤)?\s*(?P<h>\d{1,2})\s*(?::\s*(?P<mi>\d{2})(?:\s*:\s*\d{2})?\s*(?P<ap2>AM|PM)?|\s*(?P<ap3>AM|PM)|\s*시\s*(?:(?P<mi2>\d{1,2})\s*분)?(?:\s*반)?|(?P<bare>)(?=\s*[,、/·]|\s*$|\s*\(|\s*공연)))
  |(?P<wdrange>[월화수목금토일]\s*[~\-]\s*[월화수목금토일])
  |(?P<wdclass>주말\s*(?:[&,·]\s*공휴일)?|공휴일|평일)
  |\(?\s*(?P<wdlist>[월화수목금토일](?:\s*[,·]?\s*[월화수목금토일]){0,6})(?:요일)?\s*\)?(?=\s*[:：]?\s*(?:\d|오전|오후|낮|저녁|밤)|\s*$|\s*[/,]|\s*공연)
@@ -185,7 +185,10 @@ def parse_time_text(raw, start, end):
                 ctx = list(days)  # 날짜 언급 없이 시각만: 기간의 모든 날
                 ctx_src = "all"
             for d in ctx:
-                sessions.append({"date": d.isoformat(), "time": t})
+                if ctx_src == "date":
+                    # 요일·기간 규칙 뒤에 날짜를 따로 적은 회차("*6월 3일(수) 14시, 16시 30분")는 그날의 예외: 앞 규칙 회차를 대신함
+                    sessions[:] = [x for x in sessions if not (x["date"] == d.isoformat() and x["src"] != "date")]
+                sessions.append({"date": d.isoformat(), "time": t, "src": ctx_src})
             had_time = True
         elif m.group("wdrange"):
             new_group("wd")
@@ -227,7 +230,7 @@ def parse_time_text(raw, start, end):
     for x in sorted(sessions, key=lambda x: (x["date"], x["time"])):
         if (x["date"], x["time"]) not in seen:
             seen.add((x["date"], x["time"]))
-            out.append(x)
+            out.append({"date": x["date"], "time": x["time"]})
     if not out and not checks:
         checks.append({"kind": "time_unparsed", "text": raw})
     return out, checks, s

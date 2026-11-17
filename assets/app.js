@@ -15,7 +15,7 @@
       todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
       levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "그 달 안에서 들어오는 차가 많은 시간대(상위 10~25%)입니다. 30분 일찍 오거나 큰 주차장 P1(562대)을 바로 이용하십시오.", "그 달 안에서 들어오는 차가 가장 많은 시간대(상위 10%)입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
       stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
-      sourcesH: "활용 데이터", license: "기상청 자료는 공공누리 제1유형(출처표시), 그 밖의 공공데이터는 공공데이터포털·문화 공공데이터광장 이용조건을 따릅니다. 소스 코드는 MIT 라이선스입니다.", liveLink: "실시간 주차대수(주말 운영): 기관 주차장 예상 이용률", sources: [
+      sourcesH: "활용 데이터", license: "기상청 자료는 공공누리 제1유형(출처표시), 그 밖의 공공데이터는 공공데이터포털·문화 공공데이터광장 이용조건을 따릅니다. 소스 코드는 MIT 라이선스입니다.", repo: "원천 소스(공개 저장소, 화면·갱신 스크립트·모델 추정·원천 표)", liveLink: "실시간 주차대수(주말 운영): 기관 주차장 예상 이용률", sources: [
         ["한국체육산업개발(주) 올림픽공원 입출차 정보(2024년 7월)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["한국체육산업개발(주) 올림픽공원 영문 공연정보", "https://www.data.go.kr/data/15149169/fileData.do"],
         ["한국체육산업개발(주) 올림픽공원 월별 주차현황(월 보정)", "https://www.data.go.kr/data/15131671/fileData.do"],
@@ -72,7 +72,7 @@
       todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
       levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "One of the busier hours of the month (top 10 to 25%). Arrive 30 minutes early or go straight to P1 (562 spaces).", "The busiest hours of the month (top 10%). Take the subway (Olympic Park Station, Lines 5 and 9)."],
       stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
-      sourcesH: "Data sources", license: "KMA data: KOGL Type 1 (attribution). Other open data: per data.go.kr / Culture Public Data Plaza terms. Source code: MIT.", liveLink: "Live parking count (weekends): KSPO&CO parking page (Korean only)", sources: [
+      sourcesH: "Data sources", license: "KMA data: KOGL Type 1 (attribution). Other open data: per data.go.kr / Culture Public Data Plaza terms. Source code: MIT.", repo: "Source code (public repository: pages, update scripts, model, source tables)", liveLink: "Live parking count (weekends): KSPO&CO parking page (Korean only)", sources: [
         ["KSPO&CO Olympic Park gate records (July 2024)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["KSPO&CO Olympic Park English show information", "https://www.data.go.kr/data/15149169/fileData.do"],
         ["KSPO&CO Olympic Park monthly parking totals (month factor)", "https://www.data.go.kr/data/15131671/fileData.do"],
@@ -100,7 +100,7 @@
         "The show effect applies only from 6 hours before showtime; the month factor is an unvalidated assumption. Both the level thresholds (July 50/75/90th percentiles) and the car count are scaled by the same month factor, so the month does not change the level: levels are relative to that month, and the month factor shows only in the car count.",
         sdNote("en"),
         "The sample is one month (8 major-show days), so seasonal and year-end demand enters only through the month factor.",
-        "All four Saturdays of July 2024 had major shows, so the Saturday baseline without a show is a model assumption.",
+        "All four Saturdays of July 2024 had major shows, so the Saturday baseline without a major show is a model assumption.",
       ].filter(Boolean),
       bigOn: v => `A show at ${v} that day adds concert traffic.`, bigOff: "No show at the two large venues (KSPO DOME, Handball Gymnasium) that day.",
       dayKind: { wd: "Weekday", sat: "Saturday", sun: "Sunday / holiday" },
@@ -209,7 +209,7 @@
       + (wd ? tile(T("todayWx"), `${wd.rainHours.length ? T("wxRainH")(+wd.rainHours[0]) : T("wxDry")} · ${T("wxPop")(wd.popMax ?? 0)}${wd.tmin != null ? ` · ${wd.tmin}~${wd.tmax}℃` : ""}`, true) : "");
   }
   function renderSources() {
-    $("#footSources").innerHTML = `<h4>${T("sourcesH")}</h4><ul>${T("sources").map(([n, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join("")}</ul><p class="small muted">${esc(T("license"))}</p>`;
+    $("#footSources").innerHTML = `<h4>${T("sourcesH")}</h4><ul>${T("sources").map(([n, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join("")}</ul><p><a href="https://github.com/giovinazo/olpark-guide" target="_blank" rel="noopener">${esc(T("repo"))}</a></p><p class="small muted">${esc(T("license"))}</p>`;
   }
   function renderSchedule() {
     renderChips();
