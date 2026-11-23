@@ -14,7 +14,7 @@
       skip: "본문 바로가기", brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
       todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
       levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "그 달 안에서 들어오는 차가 많은 시간대(상위 10~25%)입니다. 30분 일찍 오거나 큰 주차장 P1(562대)을 바로 이용하십시오.", "그 달 안에서 들어오는 차가 가장 많은 시간대(상위 10%)입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
-      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 위 그림은 기상청 예보",
+      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다.", stripHintWx: " 위 그림은 기상청 예보",
       wxKind: { sun: "맑음", partly: "구름 많음", cloud: "흐림", rain: "비", shower: "소나기", sleet: "비 또는 눈", snow: "눈" },
       wxBasis: pop => `강수확률 ${pop}%`, wxNoFc: "기상청 예보가 없는 날짜", wxPicked: "직접 선택",
       wxLabelFc: "날씨(예보 기준)", wxLabelPick: "날씨(직접 선택)", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
@@ -74,7 +74,7 @@
       skip: "Skip to main content", brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
       todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
       levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "One of the busier hours of the month (top 10 to 25%). Arrive 30 minutes early or go straight to P1 (562 spaces).", "The busiest hours of the month (top 10%). Take the subway (Olympic Park Station, Lines 5 and 9)."],
-      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. Icons = KMA forecast",
+      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour.", stripHintWx: " Icons = KMA forecast",
       wxKind: { sun: "Clear", partly: "Partly cloudy", cloud: "Cloudy", rain: "Rain", shower: "Showers", sleet: "Rain or snow", snow: "Snow" },
       wxBasis: pop => `${pop}% chance of rain`, wxNoFc: "No KMA forecast for this date", wxPicked: "your choice",
       wxLabelFc: "Weather (forecast)", wxLabelPick: "Weather (your choice)", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
@@ -356,7 +356,7 @@
     $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = dayWx ? ((wxAt(date, h) || {}).rain ?? 0) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""}" role="button" tabindex="0" aria-pressed="${h === hour}" aria-label="${pad(h)}:00 · ${lvNamesAll[r[1]]} · ${r[0]}${rh ? " ☂" : ""}"></div>`; }).join("");
     $("#fcTicks").innerHTML = [...Array(24)].map((_, h) => `<span class="${h === hour ? "on" : ""}">${h % 3 === 0 || h === hour ? h : ""}</span>`).join("");
     $("#fcReadout").innerHTML = `<b>${pad(hour)}:00</b><span class="lv l${lv}">${lvName}</span><span>${T("expected")(n)}</span>${wx ? `<span class="rwx">${wxIcon(wxKind(wx), T("wxKind")[wxKind(wx)])}${T("wxKind")[wxKind(wx)]}${wx.tmp != null ? ` ${wx.tmp}℃` : ""}</span>` : rain ? `<span class="rwx">${wxIcon("rain", T("forecast.rainy"))}${T("forecast.rainy")} (${T("wxPicked")})</span>` : ""}`;
-    $("#stripTitle").textContent = T("stripTitle"); $("#stripHint").textContent = T("stripHint");
+    $("#stripTitle").textContent = T("stripTitle"); $("#stripHint").textContent = T("stripHint") + (dayWx ? T("stripHintWx") : "");
     const th = monthThresholds(date);
     const lvNames = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;
     $("#fcLegend").innerHTML = lvNames.map((nm, i) => `<span><i class="l${i}"></i>${T("legendLv")(nm, i === 0 ? null : th[i - 1], i < th.length ? th[i] - 1 : null)}</span>`).join("");
