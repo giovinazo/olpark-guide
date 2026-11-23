@@ -14,7 +14,10 @@
       skip: "본문 바로가기", brand: "올림픽공원 공연·주차 길잡이", tagline: "공연 일정 표준화 · 시간대별 주차 혼잡 예보 · 데이터 점검", "tab.schedule": "공연 일정", "tab.forecast": "주차 혼잡 예보", "tab.quality": "데이터 점검판",
       todayShows: "오늘 공연", todayNone: "오늘은 공연이 없습니다", nextBig: "다음 대형 공연", todayWx: "오늘 날씨(기상청)", wxRainH: h => `비 ${h}시부터`, wxDry: "비 소식 없음", wxPop: p => `강수확률 최고 ${p}%`, countShows: n => `${n}건`,
       levelTip: ["주차장 여유가 있는 시간대입니다.", "평소 수준입니다. 공연장 옆 주차장이 차면 P1·P2로 돌리십시오.", "그 달 안에서 들어오는 차가 많은 시간대(상위 10~25%)입니다. 30분 일찍 오거나 큰 주차장 P1(562대)을 바로 이용하십시오.", "그 달 안에서 들어오는 차가 가장 많은 시간대(상위 10%)입니다. 지하철(5·9호선 올림픽공원역) 이용을 권합니다."],
-      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 흰 점은 비 예보", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
+      stripTitle: "시간대별 수준(0~23시)", stripHint: "막대를 누르면 그 시각으로 바뀝니다. 위 그림은 기상청 예보",
+      wxKind: { sun: "맑음", partly: "구름 많음", cloud: "흐림", rain: "비", shower: "소나기", sleet: "비 또는 눈", snow: "눈" },
+      wxBasis: pop => `강수확률 ${pop}%`, wxNoFc: "기상청 예보가 없는 날짜", wxPicked: "직접 선택",
+      wxLabelFc: "날씨(예보 기준)", wxLabelPick: "날씨(직접 선택)", legendLv: (name, lo, hi) => `${name} ${lo == null ? `~${hi}대` : hi == null ? `${lo}대 이상` : `${lo}~${hi}대`}/시간`,
       sourcesH: "활용 데이터", license: "기상청 자료는 공공누리 제1유형(출처표시), 그 밖의 공공데이터는 공공데이터포털·문화 공공데이터광장 이용조건을 따릅니다. 소스 코드는 MIT 라이선스입니다.", repo: "원천 소스(공개 저장소, 화면·갱신 스크립트·모델 추정·원천 표)", liveLink: "실시간 주차대수(주말 운영): 기관 주차장 예상 이용률", sources: [
         ["한국체육산업개발(주) 올림픽공원 입출차 정보(2024년 7월)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["한국체육산업개발(주) 올림픽공원 영문 공연정보", "https://www.data.go.kr/data/15149169/fileData.do"],
@@ -28,7 +31,7 @@
       ],
       "schedule.title": "다가오는 공연", "schedule.sub": "공공데이터의 공연장 이름을 하나로 맞추고 기간을 날짜별로 풀어 보여 줍니다.",
       "forecast.title": "주차 혼잡 예보", "forecast.sub": "요일·시각·공연 시작까지 남은 시간·비로 그 시간대 입차 수준을 예상하고, 월 보정을 곱해 예상 대수를 냅니다. 2024년 7월 입출차 21만 5천 건으로 추정했고 검증 수치는 아래 '예보 모델 근거'에 있습니다.",
-      "forecast.date": "날짜", "forecast.hour": "시각", "forecast.venue": "공연장", "forecast.rain": "비 예보", "forecast.clear": "맑음", "forecast.rainy": "비",
+      "forecast.date": "날짜", "forecast.hour": "시각", "forecast.venue": "공연장", "forecast.rain": "날씨", "forecast.clear": "맑음", "forecast.rainy": "비",
       "quality.title": "데이터 점검판", "quality.sub": "서비스가 공연 자료를 받을 때 자동으로 걸러 낸 항목입니다. 표기 통일과 빈칸 보완이 필요한 곳을 보여 줍니다.",
       "foot.disclaimer": "예보는 과거 입출차 기록으로 추정한 값이며 실제 주차 가능 대수와 다를 수 있습니다. 공연 정보는 기관 누리집 원문을 확인하십시오.",
       all: "전체", today: "오늘", days: "일간", min: "분", official: "기관 안내", forecastBtn: "주차 예보", bigShow: "대형 공연", venueFixed: "표기 통일", noUpcoming: "다가오는 공연이 없습니다.",
@@ -48,7 +51,7 @@
       dayKind: { wd: "평일", sat: "토요일", sun: "일요일·공휴일" },
       parkingH: "가까운 주차장", lot: "주차장", spaces: "대수", walk: "걸어서", gates: "진입 출입문", hours: "운영 시간", feeH: "요금", noLot: "이 공연장은 주차장 안내가 없습니다. P1(562대)을 이용하십시오.",
       transitH: "대중교통", exit: "출구", toward: "→", tipsH: "공연일 안내",
-      wxLine: (base, pop, pty, tmp) => `기상청 단기예보(${base} 발표): 강수확률 ${pop}%${pty ? ` · ${pty}` : ""}${tmp != null ? ` · ${tmp}℃` : ""}. 비 여부를 예보로 채웠습니다.`,
+      wxLine: (base, pop, pty, tmp) => `기상청 단기예보(${base} 발표): 강수확률 ${pop}%${pty ? ` · ${pty}` : ""}${tmp != null ? ` · ${tmp}℃` : ""}. 이 예보로 계산했습니다(눈·소나기도 비로 계산).`,
       wxManual: "직접 고른 값으로 계산 중(날짜를 바꾸면 예보로 돌아감)", wxNone: last => `기상청 단기예보 범위(${last}까지) 밖이라 비 여부는 직접 고르십시오.`,
       pty: { 0: "", 1: "비", 2: "비 또는 눈", 3: "눈", 4: "소나기" },
       timeUnknown: "시각 미확인", timeCheck: "시각 표기 점검", booking: "예매", startAt: (v, t) => `${v} 공연 시작 ${t}. 2024년 7월 기록으로 추정하면 시작 5~6시간 전부터 입차가 늘고, 1~2시간 전에는 같은 요일·시각 기준값의 약 1.7배입니다.`,
@@ -71,7 +74,10 @@
       skip: "Skip to main content", brand: "Olympic Park Show & Parking Guide", tagline: "Unified show schedule · hourly parking forecast · data check", "tab.schedule": "Shows", "tab.forecast": "Parking forecast", "tab.quality": "Data check",
       todayShows: "Shows today", todayNone: "No shows today", nextBig: "Next major show", todayWx: "Weather today (KMA)", wxRainH: h => `Rain from ${h}:00`, wxDry: "No rain expected", wxPop: p => `max rain chance ${p}%`, countShows: n => `${n}`,
       levelTip: ["Parking is easy at this hour.", "Normal level. If the lot next to the venue is full, use P1 or P2.", "One of the busier hours of the month (top 10 to 25%). Arrive 30 minutes early or go straight to P1 (562 spaces).", "The busiest hours of the month (top 10%). Take the subway (Olympic Park Station, Lines 5 and 9)."],
-      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. White dot = rain forecast", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
+      stripTitle: "Level by hour (0 to 23)", stripHint: "Tap a bar to pick that hour. Icons = KMA forecast",
+      wxKind: { sun: "Clear", partly: "Partly cloudy", cloud: "Cloudy", rain: "Rain", shower: "Showers", sleet: "Rain or snow", snow: "Snow" },
+      wxBasis: pop => `${pop}% chance of rain`, wxNoFc: "No KMA forecast for this date", wxPicked: "your choice",
+      wxLabelFc: "Weather (forecast)", wxLabelPick: "Weather (your choice)", legendLv: (name, lo, hi) => `${name} ${lo == null ? `up to ${hi}` : hi == null ? `${lo}+` : `${lo} to ${hi}`} cars/h`,
       sourcesH: "Data sources", license: "KMA data: KOGL Type 1 (attribution). Other open data: per data.go.kr / Culture Public Data Plaza terms. Source code: MIT.", repo: "Source code (public repository: pages, update scripts, model, source tables)", liveLink: "Live parking count (weekends): KSPO&CO parking page (Korean only)", sources: [
         ["KSPO&CO Olympic Park gate records (July 2024)", "https://www.data.go.kr/data/15138735/fileData.do"],
         ["KSPO&CO Olympic Park English show information", "https://www.data.go.kr/data/15149169/fileData.do"],
@@ -85,7 +91,7 @@
       ],
       "schedule.title": "Upcoming shows", "schedule.sub": "Venue names from open data are unified and multi-day runs are expanded by date.",
       "forecast.title": "Parking forecast", "forecast.sub": "Expected inbound level by weekday type, hour, time left to showtime and rain, with the car count scaled by a month factor; estimated from 215,528 gate records of July 2024. Validation figures are under 'How the forecast is made'.",
-      "forecast.date": "Date", "forecast.hour": "Hour", "forecast.venue": "Venue", "forecast.rain": "Rain", "forecast.clear": "Clear", "forecast.rainy": "Rain",
+      "forecast.date": "Date", "forecast.hour": "Hour", "forecast.venue": "Venue", "forecast.rain": "Weather", "forecast.clear": "Clear", "forecast.rainy": "Rain",
       "quality.title": "Data check", "quality.sub": "Items the service flagged automatically while loading show data: inconsistent venue names and blanks.",
       "foot.disclaimer": "Forecasts are estimates from past gate records and may differ from actual availability. Check the official page for show details.",
       all: "All", today: "Today", days: "days", min: "min", official: "Official page", forecastBtn: "Parking", bigShow: "Major show", venueFixed: "Name unified", noUpcoming: "No upcoming shows.",
@@ -106,7 +112,7 @@
       dayKind: { wd: "Weekday", sat: "Saturday", sun: "Sunday / holiday" },
       parkingH: "Nearest parking", lot: "Lot", spaces: "Spaces", walk: "Walk", gates: "Gates", hours: "Hours", feeH: "Fee", noLot: "No lot listed for this venue. Use P1 (562 spaces).",
       transitH: "Public transport", exit: "Exit", toward: "→", tipsH: "Show-day tips",
-      wxLine: (base, pop, pty, tmp) => `KMA short-term forecast (issued ${base}): rain chance ${pop}%${pty ? ` · ${pty}` : ""}${tmp != null ? ` · ${tmp}℃` : ""}. The rain input was filled from the forecast.`,
+      wxLine: (base, pop, pty, tmp) => `KMA short-term forecast (issued ${base}): rain chance ${pop}%${pty ? ` · ${pty}` : ""}${tmp != null ? ` · ${tmp}℃` : ""}. Computed from this forecast (snow and showers count as rain).`,
       wxManual: "using your manual choice (changing the date restores the forecast)", wxNone: last => `Outside the forecast range (through ${last}); choose rain manually.`,
       pty: { 0: "", 1: "rain", 2: "rain or snow", 3: "snow", 4: "showers" },
       timeUnknown: "Time not listed", timeCheck: "Time text check", booking: "Tickets", startAt: (v, t) => `${v} show starts at ${t}. Estimated from July 2024 records, inbound traffic starts rising 5 to 6 hours before showtime and is about 1.7 times the baseline for that weekday type and hour 1 to 2 hours before.`,
@@ -145,7 +151,20 @@
     const rain = (s.pty || 0) !== 0 || (s.pop || 0) >= (w.rule ? w.rule.rainPop : 60);
     return { ...s, hour: pick, rain: rain ? 1 : 0 };
   }
-  function autoRain() { if (state.fc.rainMode !== "auto") return; const w = wxAt(state.fc.date, state.fc.hour); state.fc.rain = w ? w.rain : 0; }  // 단기예보 범위 밖은 비 없음으로 두고 직접 고르게 함
+  // 예보가 있으면 늘 예보 기준(직접 선택 없음), 예보 밖 날짜만 맑음으로 두고 직접 고르게 함
+  function autoRain() { const w = wxAt(state.fc.date, state.fc.hour); if (w) { state.fc.rainMode = "auto"; state.fc.rain = w.rain; } else if (state.fc.rainMode === "auto") state.fc.rain = 0; }
+  function wxKind(s) { const p = s.pty || 0; return p === 3 ? "snow" : p === 2 ? "sleet" : p === 4 ? "shower" : p === 1 || s.rain ? "rain" : s.sky === 1 ? "sun" : s.sky === 3 ? "partly" : "cloud"; }
+  const CLOUD = '<path d="M7.5 15.5h9a3.5 3.5 0 0 0 .4-6.98A5.5 5.5 0 0 0 6.3 8.2 3.7 3.7 0 0 0 7.5 15.5z"/>';
+  const WX_SVG = {
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2.5 12h2M19.5 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    partly: '<path d="M8.5 2.5v1.5M3 8h1.5M4.6 4.1l1 1M12.4 4.1l-1 1"/><path d="M11.8 8.6a3.6 3.6 0 0 0-6.4 2.3"/><path d="M9 20.5h8.5a3.5 3.5 0 0 0 .4-6.98A5 5 0 0 0 8.4 12.4 4 4 0 0 0 9 20.5z"/>',
+    cloud: '<path d="M7 19h10a4.2 4.2 0 0 0 .5-8.37A6.3 6.3 0 0 0 5.6 9.4 4.8 4.8 0 0 0 7 19z"/>',
+    rain: CLOUD + '<path d="M8.5 18.5l-1 3M12.5 18.5l-1 3M16.5 18.5l-1 3"/>',
+    shower: CLOUD + '<path d="M9 18.5l-1.5 3.5M14 18.5l-1.5 3.5"/>',
+    sleet: CLOUD + '<path d="M8.5 18.5l-1 3M15.5 18.5l-1 3"/><path d="M12 19.5v.01M12 22v.01" stroke-width="2.8"/>',
+    snow: CLOUD + '<path d="M8 19v.01M12 20v.01M16 19v.01M10 22.3v.01M14 22.3v.01" stroke-width="2.8"/>',
+  };
+  const wxIcon = (k, label) => `<svg class="wxi wx-${k}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${label || k}">${WX_SVG[k]}</svg>`;
 
   async function load() {
     const names = ["shows", "model", "venues", "quality", "holidays", "details", "titles_en", "weather", "files_check"];
@@ -289,6 +308,11 @@
   function syncForecastForm() {
     $("#fcDate").value = state.fc.date; $("#fcHour").value = state.fc.hour; $("#fcVenue").value = state.fc.venue;
     $$("#fcForm [data-rain]").forEach(b => b.classList.toggle("is-on", +b.dataset.rain === state.fc.rain));
+    const w = wxAt(state.fc.date, state.fc.hour);
+    $("#fcSeg").hidden = !!w; $("#fcWx").hidden = !w; $("#fcWxNote").hidden = !!w;
+    $("#fcWxNote").textContent = T("wxNoFc");
+    $("#fcWxLabel").textContent = T(w ? "wxLabelFc" : "wxLabelPick");
+    if (w) { const k = wxKind(w), nm = T("wxKind")[k]; $("#fcWx").innerHTML = `${wxIcon(k, nm)}<span><b>${nm}</b>${w.tmp != null ? ` ${w.tmp}℃` : ""}<small>${T("wxBasis")(w.pop ?? "-")}</small></span>`; }
   }
   function initForecastForm() {
     $("#fcHour").innerHTML = [...Array(24)].map((_, h) => `<option value="${h}">${pad(h)}:00</option>`).join("");
@@ -326,9 +350,12 @@
         ${wxLine}
       </div>`;
     const lvNamesAll = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;
-    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""} ${rh ? "rain" : ""}" role="button" tabindex="0" aria-pressed="${h === hour}" aria-label="${pad(h)}:00 · ${lvNamesAll[r[1]]} · ${r[0]}${rh ? " ☂" : ""}"></div>`; }).join("");
+    const dayWx = !!(DATA.weather && DATA.weather.hours && DATA.weather.hours[date]);
+    $("#fcWxRow").innerHTML = dayWx ? [...Array(24)].map((_, h) => { const w = wxAt(date, h); return `<span>${w ? wxIcon(wxKind(w), T("wxKind")[wxKind(w)]) : ""}</span>`; }).join("") : "";
+    $("#fcWxRow").hidden = !dayWx;
+    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = dayWx ? ((wxAt(date, h) || {}).rain ?? 0) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""}" role="button" tabindex="0" aria-pressed="${h === hour}" aria-label="${pad(h)}:00 · ${lvNamesAll[r[1]]} · ${r[0]}${rh ? " ☂" : ""}"></div>`; }).join("");
     $("#fcTicks").innerHTML = [...Array(24)].map((_, h) => `<span class="${h === hour ? "on" : ""}">${h % 3 === 0 || h === hour ? h : ""}</span>`).join("");
-    $("#fcReadout").innerHTML = `<b>${pad(hour)}:00</b><span class="lv l${lv}">${lvName}</span><span>${T("expected")(n)}</span>${rain ? `<span class="muted">☂ ${T("forecast.rainy")}</span>` : ""}`;
+    $("#fcReadout").innerHTML = `<b>${pad(hour)}:00</b><span class="lv l${lv}">${lvName}</span><span>${T("expected")(n)}</span>${wx ? `<span class="rwx">${wxIcon(wxKind(wx), T("wxKind")[wxKind(wx)])}${T("wxKind")[wxKind(wx)]}${wx.tmp != null ? ` ${wx.tmp}℃` : ""}</span>` : rain ? `<span class="rwx">${wxIcon("rain", T("forecast.rainy"))}${T("forecast.rainy")} (${T("wxPicked")})</span>` : ""}`;
     $("#stripTitle").textContent = T("stripTitle"); $("#stripHint").textContent = T("stripHint");
     const th = monthThresholds(date);
     const lvNames = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;

@@ -51,13 +51,16 @@
       <label><span data-i18n="forecast.date">날짜</span><input type="date" id="fcDate"></label>
       <label><span data-i18n="forecast.hour">시각</span><select id="fcHour"></select></label>
       <label><span data-i18n="forecast.venue">공연장</span><select id="fcVenue"></select></label>
-      <label class="toggle"><span data-i18n="forecast.rain">비 예보</span>
-        <span class="seg"><button type="button" data-rain="0" class="is-on" data-i18n="forecast.clear">맑음</button><button type="button" data-rain="1" data-i18n="forecast.rainy">비</button></span>
+      <label class="toggle"><span id="fcWxLabel">날씨(예보 기준)</span>
+        <span class="wxbox" id="fcWx" hidden></span>
+        <span class="seg" id="fcSeg"><button type="button" data-rain="0" class="is-on" data-i18n="forecast.clear">맑음</button><button type="button" data-rain="1" data-i18n="forecast.rainy">비</button></span>
+        <small class="wxnote" id="fcWxNote" hidden></small>
       </label>
     </form>
     <div class="result" id="fcResult"></div>
     <div class="striphead"><span id="stripTitle"></span><span id="stripHint" class="small"></span></div>
     <div class="readout" id="fcReadout" aria-live="polite"></div>
+    <div class="hourwx" id="fcWxRow" aria-hidden="true"></div>
     <div class="hourstrip" id="fcStrip"></div>
     <div class="hourticks" id="fcTicks" aria-hidden="true"></div>
     <div class="legend" id="fcLegend"></div>

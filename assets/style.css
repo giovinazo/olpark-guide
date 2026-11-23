@@ -110,6 +110,17 @@ button,input,select{font:inherit}
 .seg button{border:0;background:var(--card);color:var(--ink);padding:0 16px;cursor:pointer;flex:1;font-weight:600}
 .seg button+button{border-left:1px solid var(--line)}
 .seg button.is-on{background:var(--accent);color:#fff}
+.wxbox{display:flex;align-items:center;gap:10px;min-height:48px;padding:4px 12px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--bg,#f4f5f6);font-weight:400}
+.wxbox b{font-size:var(--fs-body);color:var(--ink-strong)}
+.wxbox small{display:block;font-size:var(--fs-xs);color:var(--muted);font-weight:400;white-space:nowrap}
+.wxbox .wxi{width:30px;height:30px;flex:none}
+.wxnote{font-size:var(--fs-xs);color:var(--muted);font-weight:400}
+.wxi{width:16px;height:16px;vertical-align:-3px}
+.wx-sun{color:#e0960b}.wx-partly{color:#7a8594}.wx-cloud{color:#7a8594}.wx-rain,.wx-shower,.wx-sleet{color:#256ef4}.wx-snow{color:#3a9bd9}
+.hourwx{display:grid;grid-template-columns:repeat(24,1fr);gap:2px;padding:0 9px 4px;justify-items:center}
+.hourwx .wxi{width:16px;height:16px}
+.readout .rwx{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+.readout .rwx .wxi{width:20px;height:20px}
 .result{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;display:grid;grid-template-columns:auto 1fr;gap:8px 24px;align-items:center}
 .level{display:grid;place-items:center;min-width:132px;padding:18px 12px;border-radius:var(--r-lg);color:#fff;font-weight:800;font-size:24px;text-align:center;line-height:1.2}
 .level small{font-size:var(--fs-xs);font-weight:600;opacity:.92;margin-top:6px}
@@ -185,8 +196,11 @@ td.num,th.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-n
   .hourstrip{padding:4px;gap:1px}
   .hourstrip div{height:44px}
   .hourticks{gap:1px;padding:4px 5px 0;font-size:10px}
+  .hourwx{gap:1px;padding:0 5px 3px}
+  .hourwx .wxi{width:12px;height:12px}
   .striphead{flex-direction:column;align-items:flex-start;gap:2px}
   .level{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:4px 12px;padding:14px 16px;font-size:21px;text-align:left}
   .level small{margin-top:0;font-size:var(--fs-sm)}
   .today .t .v{white-space:normal}
 }
+[hidden]{display:none!important}
