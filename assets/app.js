@@ -325,12 +325,18 @@
         ${(() => { const t = [...new Set(DATA.shows.shows.filter(s => isShow(s) && s.venue === venue && s.start <= date && s.end >= date).flatMap(s => timesOn(s, date)))].sort(); return t.length ? `<p class="why">${T("startAt")(venueName(venue), t.join(" · "))}</p>` : ""; })()}
         ${wxLine}
       </div>`;
-    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""} ${rh ? "rain" : ""}" title="${pad(h)}:00 · ${r[0]}${rh ? " ☂" : ""}">${h % 3 === 0 ? h : ""}</div>`; }).join("");
+    const lvNamesAll = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;
+    $("#fcStrip").innerHTML = [...Array(24)].map((_, h) => { const rh = state.fc.rainMode === "auto" && wx ? ((wxAt(date, h) || {}).rain ?? rain) : rain; const r = lookup(date, h, big, rh); return `<div class="l${r[1]} ${h === hour ? "sel" : ""} ${rh ? "rain" : ""}" role="button" tabindex="0" aria-pressed="${h === hour}" aria-label="${pad(h)}:00 · ${lvNamesAll[r[1]]} · ${r[0]}${rh ? " ☂" : ""}"></div>`; }).join("");
+    $("#fcTicks").innerHTML = [...Array(24)].map((_, h) => `<span class="${h === hour ? "on" : ""}">${h % 3 === 0 || h === hour ? h : ""}</span>`).join("");
+    $("#fcReadout").innerHTML = `<b>${pad(hour)}:00</b><span class="lv l${lv}">${lvName}</span><span>${T("expected")(n)}</span>${rain ? `<span class="muted">☂ ${T("forecast.rainy")}</span>` : ""}`;
     $("#stripTitle").textContent = T("stripTitle"); $("#stripHint").textContent = T("stripHint");
     const th = monthThresholds(date);
     const lvNames = lang === "ko" ? DATA.model.levels : DATA.model.levelsEn;
     $("#fcLegend").innerHTML = lvNames.map((nm, i) => `<span><i class="l${i}"></i>${T("legendLv")(nm, i === 0 ? null : th[i - 1], i < th.length ? th[i] - 1 : null)}</span>`).join("");
-    $$("#fcStrip div").forEach((el, h) => el.onclick = () => { state.fc.hour = h; syncForecastForm(); renderForecast(); });
+    $$("#fcStrip div").forEach((el, h) => {
+      const pick = () => { state.fc.hour = h; syncForecastForm(); renderForecast(); $$("#fcStrip div")[h].focus({ preventScroll: true }); };
+      el.onclick = pick; el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } };
+    });
     const v = DATA.venues.venues[venue] || {};
     $("#fcParking").innerHTML = `<h3>${T("parkingH")} · ${venueName(venue)}</h3>` + (v.lot ? `<dl class="kv">
       <dt>${T("lot")}</dt><dd>${esc(v.lot)}</dd><dt>${T("spaces")}</dt><dd>${v.lotSpaces ?? "-"}</dd>
