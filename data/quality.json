@@ -1,11 +1,11 @@
 {
- "generated": "2026-11-24 14:22",
- "total": 2782,
- "clean": 879,
+ "generated": "2026-11-25 05:19",
+ "total": 2789,
+ "clean": 883,
  "counts": {
   "venue_blank": 107,
-  "duration_blank": 1349,
-  "venue_variant": 987,
+  "duration_blank": 1351,
+  "venue_variant": 988,
   "duration_unparsed": 27,
   "venue_unmatched": 8,
   "non_show": 811,
@@ -13,11 +13,11 @@
  },
  "recent": {
   "from": "2024-01-01",
-  "total": 387,
-  "clean": 144,
+  "total": 394,
+  "clean": 148,
   "counts": {
-   "venue_variant": 165,
-   "duration_blank": 116,
+   "venue_variant": 166,
+   "duration_blank": 118,
    "venue_unmatched": 1,
    "duration_unparsed": 5
   },
@@ -93,22 +93,22 @@
     "n": 2
    },
    {
-    "raw": "KSPO DOME(올림픽체조경기장), 88잔디마당",
-    "canonical": "KSPO DOME",
-    "n": 1
+    "raw": "티켓링크 라이브 아레나(핸드볼경기장)",
+    "canonical": "핸드볼경기장",
+    "n": 2
    }
   ]
  },
  "venues": {
   "미상": 115,
-  "우리금융아트홀": 202,
-  "KSPO DOME": 665,
+  "우리금융아트홀": 203,
+  "KSPO DOME": 667,
   "옥외·기타": 39,
-  "올림픽홀": 799,
-  "뮤즈라이브": 269,
+  "올림픽홀": 801,
+  "뮤즈라이브": 270,
   "88호수 수변무대": 22,
   "88잔디마당": 75,
-  "핸드볼경기장": 451,
+  "핸드볼경기장": 452,
   "평화의 광장": 3,
   "K-아트홀": 142
  },
